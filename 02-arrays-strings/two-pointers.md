@@ -134,8 +134,8 @@ function reverse(arr) {
 
 ## 🏋️ Задачи для практики
 
-Файлы с условиями лежат в [`practice/`](../practice/). Порядок прохождения:
-1. **`two-pointers-01-valid-palindrome`** — проверка палиндрома (указатели навстречу). ← начни с неё
+Файлы с условиями лежат в [`practice/two-pointers/`](../practice/two-pointers/). Порядок прохождения:
+1. **[`01-valid-palindrome`](../practice/two-pointers/01-valid-palindrome.md)** — проверка палиндрома (указатели навстречу). ← начни с неё
 2. Разворот массива на месте (уже разобран выше — можешь написать по памяти).
 3. Move Zeroes — сдвинуть все нули в конец (fast/slow).
 4. Remove Duplicates from Sorted Array — удалить дубликаты на месте (fast/slow).

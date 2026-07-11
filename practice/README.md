@@ -3,10 +3,12 @@
 Здесь складываем файлы с **условиями задач без решений**. Ты решаешь прямо в файле,
 затем в чате просишь проверить и разобрать.
 
-## Соглашение об именовании
-`<тема>-<номер>-<краткое-название>.md`, например:
-- `sliding-window-01-longest-substring.md`
-- `stack-02-valid-parentheses.md`
+## Структура и именование
+Задачи сгруппированы по темам в подпапках: `practice/<тема>/`.
+Внутри файлы называем `<номер>-<краткое-название>.md`, например:
+- `practice/sliding-window/01-min-subarray-sum.md`
+- `practice/two-pointers/01-valid-palindrome.md`
+- `practice/stack-queue/02-valid-parentheses.md`
 
 ## Шаблон файла задачи
 ```md
