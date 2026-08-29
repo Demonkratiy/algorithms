@@ -44,7 +44,7 @@
 а буквально подставь значения и проследи за переменными.
 
 ### E — Evaluate (оценить сложность)
-Назови **Big O по времени и памяти** (см. [big-o.md](01-basics/big-o.md)) и подумай, можно ли
+Назови **Big O по времени и памяти** (см. [big-o.md](01-basics/01-big-o.md)) и подумай, можно ли
 лучше. Интервьюер почти всегда спросит _«какая сложность?»_ — отвечай до того, как спросят.
 
 ---
@@ -55,17 +55,27 @@
 
 | Если в условии видишь…                                              | Пробуй паттерн                | Заметка |
 |---------------------------------------------------------------------|-------------------------------|---------|
-| Массив **отсортирован**, ищем пару/тройку с суммой                   | **Two Pointers**              | [ссылка](02-arrays-strings/two-pointers.md) |
-| Самая длинная/короткая **подстрока/подмассив** по условию            | **Sliding Window**            | [ссылка](02-arrays-strings/sliding-window.md) |
-| «Сколько раз встречается», анаграмма, дубликаты, уникальный символ   | **Frequency Counter** (Map)   | [ссылка](02-arrays-strings/frequency-counter.md) |
-| «Сумма подмассива», «сколько подмассивов с суммой K»                 | **Prefix Sum**                | [ссылка](02-arrays-strings/prefix-sum.md) |
-| «Найти за `O(log N)`» / «массив отсортирован» / «минимальное X, при котором…» | **Binary Search**    | [ссылка](04-search-sort/binary-search.md) |
-| Скобки, «последний добавленный», undo, ближайший больший элемент     | **Stack**                     | [ссылка](03-linear-structures/stack-queue.md) |
-| Обход по уровням, «кратчайший путь» в невзвешенном графе             | **Queue / BFS**               | [ссылка](03-linear-structures/stack-queue.md) |
-| Узлы со ссылками, разворот списка, цикл                              | **Linked List** (fast/slow)   | [ссылка](03-linear-structures/linked-lists.md) |
-| Дерево/иерархия, обход, глубина, путь                               | **DFS / BFS**                 | [ссылка](05-recursion-trees/binary-trees.md) |
-| Задача сводится к подзадаче того же вида                             | **Recursion**                 | [ссылка](05-recursion-trees/recursion.md) |
-| «После сортировки задача упрощается»                                | **Sorting** + Two Pointers    | [ссылка](04-search-sort/sorting.md) |
+| Массив **отсортирован**, ищем пару/тройку с суммой                   | **Two Pointers**              | [ссылка](02-arrays-strings/01-two-pointers.md) |
+| Самая длинная/короткая **подстрока/подмассив** по условию            | **Sliding Window**            | [ссылка](02-arrays-strings/02-sliding-window.md) |
+| «Сколько раз встречается», анаграмма, дубликаты, уникальный символ   | **Frequency Counter** (Map)   | [ссылка](02-arrays-strings/03-frequency-counter.md) |
+| «Сумма подмассива», «сколько подмассивов с суммой K»                 | **Prefix Sum**                | [ссылка](02-arrays-strings/04-prefix-sum.md) |
+| Поворот/спираль/обнуление в **двумерном** массиве                    | **Matrix**                    | [ссылка](02-arrays-strings/05-matrix.md) |
+| «Найти за `O(log N)`» / «массив отсортирован» / «минимальное X, при котором…» | **Binary Search**    | [ссылка](04-search-sort/01-binary-search.md) |
+| Скобки, «последний добавленный», undo, ближайший больший элемент     | **Stack**                     | [ссылка](03-linear-structures/02-stack-queue.md) |
+| Обход по уровням, «кратчайший путь» в невзвешенном графе             | **Queue / BFS**               | [ссылка](03-linear-structures/02-stack-queue.md) |
+| Узлы со ссылками, разворот списка, цикл                              | **Linked List** (fast/slow)   | [ссылка](03-linear-structures/01-linked-lists.md) |
+| Дерево/иерархия, обход, глубина, путь                               | **DFS / BFS**                 | [ссылка](05-recursion-trees/02-binary-trees.md) |
+| Задача сводится к подзадаче того же вида                             | **Recursion**                 | [ссылка](05-recursion-trees/01-recursion.md) |
+| «Все возможные варианты», подмножества, перестановки                | **Backtracking**              | [ссылка](05-recursion-trees/01-recursion.md) |
+| «После сортировки задача упрощается»                                | **Sorting** + Two Pointers    | [ссылка](04-search-sort/02-sorting.md) |
+| «k наибольших/наименьших», «медиана потока», поток данных            | **Heap / Priority Queue**     | [ссылка](04-search-sort/03-heap.md) |
+| «Сколько островов/групп», сетка, соседние клетки, связи              | **Graph BFS / DFS**           | [ссылка](06-graphs/01-graph-traversal.md) |
+| «Зависимости», «сначала нужно…», «можно ли завершить всё»            | **Topological Sort**          | [ссылка](06-graphs/02-topological-sort.md) |
+| «Сколько способов», «max/min сумма», выбор на каждом шаге            | **Dynamic Programming**       | [ссылка](07-dynamic-programming/01-dp-basics.md) |
+| «Максимальная прибыль», интервалы, локально лучший выбор            | **Greedy**                    | [ссылка](07-dynamic-programming/02-greedy.md) |
+| «Реализуйте debounce / deepClone / EventEmitter»                     | **JS-задачи** (не алгоритм)   | [ссылка](08-js-interview/01-function-utils.md) |
+| «Что выведется?», setTimeout вместе с Promise, async/await          | **Event Loop**                | [ссылка](08-js-interview/03-event-loop.md) |
+
 
 > ⚠️ Это эвристики, а не строгие правила. Иногда подходит несколько паттернов — тогда
 > выбираем тот, что даёт лучшую сложность.
