@@ -28,13 +28,35 @@ export type FunctionRunner = {
 export type ClassCase = {
   name: string;
   instances: JsonValue[][];
-  calls: { instance: number; method: string; args: JsonValue[]; expected: JsonValue }[];
+  calls: ClassCall[];
 };
+export type ClassCall = { instance: number; method: string; args: JsonValue[] } & (
+  { expected: JsonValue; ignoreReturn?: never } | { ignoreReturn: true; expected?: never }
+);
 export type ClassRunner = { kind: 'class'; entryPoint: string; cases: ClassCase[] };
+export type ListInput = { values: number[]; cycleAt?: number };
+export type NodeReference = { list: number; index: number };
+export type ListExpectation =
+  | { kind: 'value'; value: JsonValue }
+  | { kind: 'node'; node: NodeReference | null }
+  | { kind: 'list'; values: number[]; reuseNodes?: boolean; nodeOrder?: NodeReference[] };
+export type LinkedListCase = {
+  name: string;
+  lists: ListInput[];
+  args?: JsonValue[];
+  entryPoint?: string;
+  expected: ListExpectation;
+};
+export type LinkedListRunner = {
+  kind: 'linked-list';
+  entryPoint: string;
+  preserveInputs?: boolean;
+  cases: LinkedListCase[];
+};
 export type TaskDefinition = {
   id: string;
   title: string;
   starter: string;
   complexity: ComplexityDefinition;
-  runner: FunctionRunner | ClassRunner;
+  runner: FunctionRunner | ClassRunner | LinkedListRunner;
 };

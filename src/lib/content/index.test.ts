@@ -106,6 +106,8 @@ describe('course catalog and migration', () => {
       'min-subarray-sum', 'max-vowels', 'longest-substring',
       'first-unique-char', 'valid-anagram', 'group-anagrams', 'top-k-frequent',
       'range-sum-query', 'subarray-sum-k', 'pivot-index', 'product-except-self', 'subarray-sums-divisible-by-k',
+      'reverse-linked-list', 'middle-of-list', 'linked-list-cycle', 'merge-two-sorted-lists', 'remove-nth-from-end', 'palindrome-linked-list',
+      'valid-parentheses', 'min-stack', 'daily-temperatures', 'evaluate-rpn', 'queue-via-stacks',
     ]);
   });
 

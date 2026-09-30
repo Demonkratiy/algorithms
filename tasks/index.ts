@@ -13,6 +13,17 @@ import { subarraySumKTask } from './subarray-sum-k/task';
 import { pivotIndexTask } from './pivot-index/task';
 import { productExceptSelfTask } from './product-except-self/task';
 import { subarraySumsDivisibleByKTask } from './subarray-sums-divisible-by-k/task';
+import { reverseLinkedListTask } from './reverse-linked-list/task';
+import { middleOfListTask } from './middle-of-list/task';
+import { linkedListCycleTask } from './linked-list-cycle/task';
+import { mergeTwoSortedListsTask } from './merge-two-sorted-lists/task';
+import { removeNthFromEndTask } from './remove-nth-from-end/task';
+import { palindromeLinkedListTask } from './palindrome-linked-list/task';
+import { validParenthesesTask } from './valid-parentheses/task';
+import { minStackTask } from './min-stack/task';
+import { dailyTemperaturesTask } from './daily-temperatures/task';
+import { evaluateRpnTask } from './evaluate-rpn/task';
+import { queueViaStacksTask } from './queue-via-stacks/task';
 import { validateTask } from './validate';
 import type { TaskDefinition } from './types';
 
@@ -21,6 +32,8 @@ export const taskDefinitions: readonly TaskDefinition[] = [
   minSubarraySumTask, maxVowelsTask, longestSubstringTask,
   firstUniqueCharTask, validAnagramTask, groupAnagramsTask, topKFrequentTask,
   rangeSumTask, subarraySumKTask, pivotIndexTask, productExceptSelfTask, subarraySumsDivisibleByKTask,
+  reverseLinkedListTask, middleOfListTask, linkedListCycleTask, mergeTwoSortedListsTask, removeNthFromEndTask, palindromeLinkedListTask,
+  validParenthesesTask, minStackTask, dailyTemperaturesTask, evaluateRpnTask, queueViaStacksTask,
 ];
 const registry = new Map<string, TaskDefinition>();
 for (const definition of taskDefinitions) {

@@ -7,7 +7,7 @@ export function CoursePage() {
     <div className="eyebrow">Твой маршрут</div>
     <h1>Учимся решать, а не запоминать</h1>
     <p className="lede">Теория, осознанная практика и проверка на JavaScript. По одному паттерну за раз.</p>
-    <div className="notice">Проверка кода доступна для {topics.flatMap(topic => topic.tasks).filter(task => task.runnable).length} задач по Two Pointers, Sliding Window, Frequency Counter и Prefix Sum. Остальные разделы открыты для чтения.</div>
+    <div className="notice">Проверка кода доступна для {topics.flatMap(topic => topic.tasks).filter(task => task.runnable).length} задач. Задачи с проверкой отмечены в разделах курса; остальные доступны для чтения.</div>
     <Link className="button" to="/read/00-how-to-solve.md">Начать с UMPIRE →</Link>
     <div className="course-grid">{topics.map((topic, index) => <Link className="card topic-card" key={topic.id} to={`/topic/${topic.id}`}>
       <span className="eyebrow">{String(index + 1).padStart(2, '0')} / {topic.section}</span>

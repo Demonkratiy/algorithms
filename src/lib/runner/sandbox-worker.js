@@ -84,6 +84,86 @@
     return join(args.map(value => display(value)), ', ')
   }
 
+  class ListNode {
+    constructor(val = 0, next = null) {
+      this.val = val
+      this.next = next
+    }
+  }
+
+  function buildLists(inputs) {
+    const lists = inputs.map(input => {
+      const nodes = input.values.map(value => new ListNode(value))
+      for (let i = 0; i + 1 < nodes.length; i++) nodes[i].next = nodes[i + 1]
+      if (nodes.length && input.cycleAt !== undefined && input.cycleAt >= 0) nodes[nodes.length - 1].next = nodes[input.cycleAt]
+      return nodes
+    })
+    const all = lists.flat()
+    return {
+      lists, heads: lists.map(nodes => nodes[0] ?? null), pool: new Set(all),
+      original: all.map(node => ({ node, val: node.val, next: node.next })),
+    }
+  }
+
+  function describeNode(node, graph) {
+    if (node === null) return 'null'
+    for (let list = 0; list < graph.lists.length; list++) {
+      const index = graph.lists[list].indexOf(node)
+      if (index !== -1) return `узел lists[${list}][${index}] (val: ${display(node.val)})`
+    }
+    return node && typeof node === 'object'
+      ? `новый/посторонний узел: ${format(node)}` : display(node)
+  }
+
+  function checkLinkedResult(actual, expected, graph) {
+    if (expected.kind === 'value') return { actual: display(actual), passed: equal(actual, expected.value) }
+    if (expected.kind === 'node') {
+      const target = expected.node === null ? null : graph.lists[expected.node.list][expected.node.index]
+      return { actual: describeNode(actual, graph), passed: actual === target }
+    }
+    const nodes = []
+    const values = []
+    const seen = new Set()
+    let current = actual
+    let feedback
+    while (current !== null) {
+      if (!current || typeof current !== 'object' || !('val' in current) || !('next' in current)) {
+        feedback = 'Ожидался список из узлов { val, next }, заканчивающийся на null.'
+        break
+      }
+      if (seen.has(current)) {
+        feedback = 'В возвращённом списке обнаружен цикл.'
+        break
+      }
+      if (nodes.length >= expected.values.length) {
+        feedback = 'Возвращённый список длиннее ожидаемого.'
+        break
+      }
+      seen.add(current)
+      push(nodes, current)
+      push(values, current.val)
+      current = current.next
+    }
+    let passed = !feedback && equal(values, expected.values)
+    if (expected.reuseNodes && nodes.some(node => !graph.pool.has(node))) {
+      passed = false
+      feedback = 'По условию нужно использовать исходные узлы, а не создавать их копии.'
+    }
+    if (expected.nodeOrder && (nodes.length !== expected.nodeOrder.length
+      || expected.nodeOrder.some((ref, index) => nodes[index] !== graph.lists[ref.list][ref.index]))) {
+      passed = false
+      feedback = 'Значения недостаточно скопировать: проверь порядок ссылок на исходные узлы.'
+    }
+    return { actual: display(values), passed, ...(feedback ? { feedback } : {}) }
+  }
+
+  function expectedLinked(test) {
+    if (test.expected.kind === 'value') return display(test.expected.value)
+    if (test.expected.kind === 'list') return display(test.expected.values)
+    const ref = test.expected.node
+    return ref === null ? 'null' : `узел lists[${ref.list}][${ref.index}] (val: ${display(test.lists[ref.list].values[ref.index])})`
+  }
+
   function format(value, depth = 0, seen = new Set()) {
     if (typeof value === 'string') return slice(value, 0, 1000)
     if (value === null) return 'null'
@@ -165,17 +245,26 @@
     const results = []
     try {
       const runner = data.runner
-      const Entry = new FunctionConstructor(`${data.code}\n; return typeof ${runner.entryPoint} === "function" ? ${runner.entryPoint} : undefined;\n`)()
-      if (typeof Entry !== 'function') throw new TypeError(`Определи ${runner.kind === 'class' ? 'класс' : 'функцию'} ${runner.entryPoint} из стартового шаблона.`)
+      const names = [...new Set([runner.entryPoint, ...(runner.kind === 'linked-list' ? runner.cases.map(test => test.entryPoint ?? runner.entryPoint) : [])])]
+      const exported = join(names.map(name => `${stringify(name)}: typeof ${name} === "function" ? ${name} : undefined`), ', ')
+      const entries = new FunctionConstructor('ListNode', `return (() => {\n${data.code}\n; return {${exported}};\n})()`)(ListNode)
+      const Entry = entries?.[runner.entryPoint]
+      if (runner.kind !== 'linked-list' && typeof Entry !== 'function') throw new TypeError(`Определи ${runner.kind === 'class' ? 'класс' : 'функцию'} ${runner.entryPoint} из стартового шаблона.`)
       for (const test of runner.cases) {
         const input = runner.kind === 'function'
           ? `${runner.entryPoint}(${describeArgs(test.args)})`
-          : join(test.instances.map((args, i) => `a${i} = new ${runner.entryPoint}(${describeArgs(args)})`), '; ')
-            + '; ' + join(test.calls.map(call => `a${call.instance}.${call.method}(${describeArgs(call.args)})`), '; ')
+          : runner.kind === 'class'
+            ? join(test.instances.map((args, i) => `a${i} = new ${runner.entryPoint}(${describeArgs(args)})`), '; ')
+              + '; ' + join(test.calls.map(call => `a${call.instance}.${call.method}(${describeArgs(call.args)})`), '; ')
+            : `${test.entryPoint ?? runner.entryPoint}(${join([
+              ...test.lists.map(list => `List(${display(list.values)}${list.cycleAt !== undefined && list.cycleAt >= 0 ? `, cycleAt: ${list.cycleAt}` : ''})`),
+              ...(test.args ?? []).map(value => display(value)),
+            ], ', ')})`
         currentCase = {
           name: test.name,
           input: slice(input, 0, 4000),
-          expected: display(runner.kind === 'function' ? test.expected : test.calls.map(call => call.expected)),
+          expected: runner.kind === 'linked-list' ? expectedLinked(test)
+            : display(runner.kind === 'function' ? test.expected : test.calls.map(call => call.ignoreReturn ? 'без проверки возврата' : call.expected)),
           actual: 'Выполнение теста не завершено.',
           passed: false,
           logs: [],
@@ -195,17 +284,33 @@
             currentCase.passed = false
             currentCase.feedback = 'По условию нужно вернуть новый массив, а не ссылку на входной.'
           }
-        } else {
+        } else if (runner.kind === 'class') {
           const instances = test.instances.map(args => new Entry(...clone(args)))
           const actual = []
           let passed = true
           for (const call of test.calls) {
             const value = apply(instances[call.instance][call.method], instances[call.instance], clone(call.args))
-            push(actual, value)
-            if (!equal(value, call.expected)) passed = false
+            push(actual, call.ignoreReturn ? 'без проверки возврата' : value)
+            if (!call.ignoreReturn && !equal(value, call.expected)) passed = false
           }
           currentCase.actual = display(actual)
           currentCase.passed = passed
+          if (test.calls.some(call => call.ignoreReturn)) currentCase.feedback = 'Для операций без ожидаемого значения возврат не проверяется. Их эффект проверяют последующие вызовы.'
+        } else {
+          const name = test.entryPoint ?? runner.entryPoint
+          const entry = entries?.[name]
+          if (typeof entry !== 'function') throw new TypeError(`Определи функцию ${name} из стартового шаблона.`)
+          const graph = buildLists(test.lists)
+          const value = apply(entry, undefined, [...graph.heads, ...clone(test.args ?? [])])
+          const checked = checkLinkedResult(value, test.expected, graph)
+          currentCase.actual = checked.actual
+          currentCase.passed = checked.passed
+          if (checked.feedback) currentCase.feedback = checked.feedback
+          if (runner.preserveInputs && graph.original.some(({ node, val, next }) =>
+            node.val !== val || node.next !== next || ownKeys(node).length !== 2)) {
+            currentCase.passed = false
+            currentCase.feedback = 'В этой задаче исходные узлы и связи должны оставаться неизменными.'
+          }
         }
         currentCase = undefined
       }

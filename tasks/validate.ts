@@ -1,4 +1,4 @@
-import type { JsonValue, TaskDefinition } from './types';
+import type { JsonValue, NodeReference, TaskDefinition } from './types';
 
 const identifier = /^[A-Za-z_$][\w$]*$/;
 const stableId = /^[a-z0-9][a-z0-9-]{0,79}$/;
@@ -36,12 +36,39 @@ export function validateTask(task: TaskDefinition) {
       if (runner.comparison === 'nested-unordered' && Array.isArray(test.expected)
         && !test.expected.every(group => Array.isArray(group) && group.every(primitive))) fail('nested-unordered поддерживает группы примитивов');
     }
-  } else {
+  } else if (runner.kind === 'class') {
     for (const test of runner.cases) {
-      if (!test.instances.length || !test.instances.every(args => args.every(json)) || !test.calls.length) fail('неполный тест класса');
+      if (!test.instances.length || !test.instances.every(args => args.every(json)) || !test.calls.length
+        || !test.calls.some(call => !call.ignoreReturn)) fail('тест класса должен проверять хотя бы одно значение');
       for (const call of test.calls) {
         if (!Number.isInteger(call.instance) || call.instance < 0 || call.instance >= test.instances.length
-          || !identifier.test(call.method) || !call.args.every(json) || !json(call.expected)) fail('неверный вызов метода');
+          || !identifier.test(call.method) || !call.args.every(json)) fail('неверный вызов метода');
+        if (call.ignoreReturn === true ? call.expected !== undefined : !json(call.expected)) fail('неверное ожидание метода');
+      }
+    }
+  } else {
+    for (const test of runner.cases) {
+      if (!test.lists.length || (test.entryPoint !== undefined && !identifier.test(test.entryPoint))
+        || (test.args !== undefined && !test.args.every(json))) fail('неверные аргументы списка');
+      for (const list of test.lists) {
+        if (!list.values.every(value => typeof value === 'number' && Number.isFinite(value))
+          || (list.cycleAt !== undefined && (!Number.isInteger(list.cycleAt) || list.cycleAt < -1 || list.cycleAt >= list.values.length))) {
+          fail('неверные данные или позиция цикла');
+        }
+      }
+      const validReference = (node: NodeReference) => Number.isInteger(node.list) && node.list >= 0
+        && node.list < test.lists.length && Number.isInteger(node.index)
+        && node.index >= 0 && node.index < test.lists[node.list].values.length;
+      const expected = test.expected;
+      if (expected.kind === 'value') {
+        if (!json(expected.value)) fail('неверное значение результата');
+      } else if (expected.kind === 'node') {
+        if (expected.node !== null && !validReference(expected.node)) fail('неверная ссылка на ожидаемый узел');
+      } else {
+        if (!expected.values.every(value => typeof value === 'number' && Number.isFinite(value))
+          || (expected.nodeOrder !== undefined && (expected.nodeOrder.length !== expected.values.length
+            || !expected.nodeOrder.every(validReference)
+            || new Set(expected.nodeOrder.map(node => `${node.list}:${node.index}`)).size !== expected.nodeOrder.length))) fail('неверное ожидание выходного списка');
       }
     }
   }
