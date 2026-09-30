@@ -1,6 +1,6 @@
 import type { LinkedListCase, ListInput } from '../types';
 
-const scenarios: { name: string; list: ListInput; entry: number | null }[] = [
+export const cycleScenarios: { name: string; list: ListInput; entry: number | null }[] = [
   { name: 'Пустой список', list: { values: [] }, entry: null },
   { name: 'Один узел без цикла', list: { values: [1], cycleAt: -1 }, entry: null },
   { name: 'Один узел ссылается на себя', list: { values: [1], cycleAt: 0 }, entry: 0 },
@@ -14,11 +14,7 @@ const scenarios: { name: string; list: ListInput; entry: number | null }[] = [
 ];
 
 export const cases: LinkedListCase[] = [
-  ...scenarios.map(({ name, list, entry }): LinkedListCase => ({
-    name: `A · ${name}`, lists: [list], expected: { kind: 'value', value: entry !== null },
-  })),
-  ...scenarios.map(({ name, list, entry }): LinkedListCase => ({
-    name: `B · ${name}`, lists: [list], entryPoint: 'detectCycle',
-    expected: { kind: 'node', node: entry === null ? null : { list: 0, index: entry } },
+  ...cycleScenarios.map(({ name, list, entry }): LinkedListCase => ({
+    name, lists: [list], expected: { kind: 'value', value: entry !== null },
   })),
 ];

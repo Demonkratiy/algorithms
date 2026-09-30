@@ -187,7 +187,7 @@ function merge(intervals) {
 - **Insert Interval** — вставить новый интервал в уже отсортированный список;
 - **Non-overlapping Intervals** — минимум удалений, чтобы не осталось пересечений
   (сортировка по **концу**, жадность);
-- **Meeting Rooms I/II** — см. [`04-meeting-rooms`](04-meeting-rooms.md);
+- **Meeting Rooms** — [I](04-meeting-rooms.md) и [II](04-b-meeting-rooms-ii.md);
 - **Interval List Intersections** — пересечение двух списков (two pointers).
 
 Если в условии слово «интервал»/«отрезок»/«встреча» — первым делом думай про сортировку.

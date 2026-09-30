@@ -3,9 +3,9 @@ import { expect, test } from '@playwright/test';
 test('course, theory and non-runnable practice are readable', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Учимся решать, а не запоминать' })).toBeVisible();
-  await page.locator('.topic-card').filter({ hasText: 'Matrix' }).click();
-  await expect(page.locator('.article')).toContainText('Matrix');
-  await page.locator('.task-link').filter({ hasText: 'Rotate Image' }).click();
+  await page.locator('.topic-card').filter({ hasText: 'Binary Trees' }).click();
+  await expect(page.locator('.article')).toContainText('Binary Trees');
+  await page.locator('.task-link').filter({ hasText: 'Maximum Depth' }).click();
   await expect(page.getByText('Проверка этой задачи ещё не подключена.', { exact: false })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Проверить решение' })).toHaveCount(0);
   await page.getByRole('button', { name: 'Разбор', exact: true }).click();

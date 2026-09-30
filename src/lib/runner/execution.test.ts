@@ -86,6 +86,80 @@ describe('generic worker execution', () => {
     expect(execute(correct, runner).status).toBe('passed');
     expect(execute(correct.replace('this.n += x;', ''), runner).status).toBe('failed');
   });
+  it('reads class properties and distinguishes required undefined from null', () => {
+    const runner: ClassRunner = { kind: 'class', entryPoint: 'Box', cases: [{
+      name: 'property and undefined', instances: [[]], calls: [
+        { instance: 0, property: 'size', expected: 0 },
+        { instance: 0, method: 'peek', args: [], expectedUndefined: true },
+        { instance: 0, method: 'push', args: [3], ignoreReturn: true },
+        { instance: 0, property: 'size', expected: 1 },
+        { instance: 0, method: 'peek', args: [], expected: 3 },
+      ],
+    }] };
+    const source = 'class Box { constructor(){this.values=[];} get size(){return this.values.length;} push(n){this.values.push(n);} peek(){return this.values[0];} }';
+    expect(execute(source, runner).status).toBe('passed');
+    expect(execute(source.replace('this.values[0];', 'this.values[0] ?? null;'), runner).status).toBe('failed');
+  });
+  it('injects comparator callbacks from trusted descriptors for independent instances', () => {
+    const runner: ClassRunner = { kind: 'class', entryPoint: 'Ordered', cases: [{
+      name: 'comparators', instances: [[], []],
+      factories: [
+        { instance: 0, argument: 0, kind: 'number', direction: 'desc' },
+        { instance: 1, argument: 0, kind: 'property', property: 'priority', direction: 'asc' },
+      ],
+      calls: [
+        { instance: 0, method: 'push', args: [1], ignoreReturn: true },
+        { instance: 0, method: 'push', args: [7], ignoreReturn: true },
+        { instance: 0, method: 'pop', args: [], expected: 7 },
+        { instance: 1, method: 'push', args: [{ priority: 9 }], ignoreReturn: true },
+        { instance: 1, method: 'push', args: [{ priority: 1 }], ignoreReturn: true },
+        { instance: 1, method: 'pop', args: [], expected: { priority: 1 } },
+      ],
+    }] };
+    expect(execute('class Ordered { constructor(compare){this.compare=compare;this.values=[];} push(n){this.values.push(n);this.values.sort(this.compare);} pop(){return this.values.shift();} }', runner).status).toBe('passed');
+  });
+  it('constructs through a static factory and guards retained input aliases', () => {
+    const runner: ClassRunner = { kind: 'class', entryPoint: 'Box', factoryMethod: 'from', preserveArgs: [0], cases: [{
+      name: 'factory copies input', instances: [[[3, 1]], [[9]]], calls: [
+        { instance: 0, property: 'size', expected: 2 },
+        { instance: 0, method: 'pop', args: [], expected: 3 },
+        { instance: 1, method: 'pop', args: [], expected: 9 },
+        { instance: 0, property: 'size', expected: 1 },
+      ],
+    }] };
+    const source = 'class Box { static from(a) { const result = new this(); result.values = [...a]; return result; } get size(){return this.values.length;} pop(){return this.values.shift();} }';
+    expect(execute(source, runner).status).toBe('passed');
+    const alias = execute(source.replace('[...a]', 'a'), runner);
+    expect(alias.status).toBe('failed');
+    expect(alias.cases[0].feedback).toContain('Исходные данные');
+  });
+  it('unordered tuples preserve coordinate or interval endpoint order', () => {
+    const runner: FunctionRunner = { ...base, comparison: 'unordered-tuples', cases: [
+      { name: 'tuples', args: [], expected: [[1, 2], [3, 4]] },
+    ] };
+    expect(execute('const solve = () => [[3,4],[1,2]];', runner).status).toBe('passed');
+    expect(execute('const solve = () => [[2,1],[3,4]];', runner).status).toBe('failed');
+  });
+  it('closest-points accepts boundary ties but not missing nearer points or fabricated duplicates', () => {
+    const runner: FunctionRunner = { ...base, comparison: 'closest-points', cases: [
+      { name: 'tie', args: [[[0, 0], [1, 0], [-1, 0]], 2], expected: [[0, 0], [1, 0]] },
+    ] };
+    expect(execute('const solve = () => [[-1,0],[0,0]];', runner).status).toBe('passed');
+    expect(execute('const solve = () => [[1,0],[-1,0]];', runner).status).toBe('failed');
+    expect(execute('const solve = () => [[0,0],[0,1]];', runner).status).toBe('failed');
+    expect(execute('const solve = () => [[0,0],[0,0]];', runner).status).toBe('failed');
+    expect(execute('const solve = () => [["0",0],[1,0]];', runner).status).toBe('failed');
+  });
+  it('closest-points respects repeated input points and does not swap coordinates', () => {
+    const duplicate: FunctionRunner = { ...base, comparison: 'closest-points', cases: [
+      { name: 'duplicates', args: [[[1, 0], [1, 0], [3, 0]], 2], expected: [[1, 0], [1, 0]] },
+    ] };
+    expect(execute('const solve = () => [[1,0],[1,0]];', duplicate).status).toBe('passed');
+    const coordinate: FunctionRunner = { ...base, comparison: 'closest-points', cases: [
+      { name: 'coordinates', args: [[[1, 3]], 1], expected: [[1, 3]] },
+    ] };
+    expect(execute('const solve = () => [[3,1]];', coordinate).status).toBe('failed');
+  });
 });
 
 describe('linked-list execution contract', () => {

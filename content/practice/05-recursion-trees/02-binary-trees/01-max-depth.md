@@ -5,6 +5,8 @@
 > ⚠️ Разобрана в теории ([binary-trees.md](../../../05-recursion-trees/02-binary-trees.md)).
 > Пиши **по памяти** обе версии (DFS и BFS). Это фундамент всех задач на деревья.
 
+Дополнительная самостоятельная задача: [Minimum Depth](01-b-min-depth.md).
+
 ## Условие
 
 Дан корень бинарного дерева `root`. Верни его **максимальную глубину** — количество узлов на
@@ -185,28 +187,5 @@ function maxDepthBFS(root) {
 
 ⚠️ `queue.shift()` — `O(N)`. На дереве из `10^4` узлов это заметно. Правильнее — указатель
 головы (`let head = 0; const node = queue[head++];`). На интервью **проговори** это.
-
-</details>
-
-<details>
-<summary>Бонус: минимальная глубина — не симметричная задача!</summary>
-
-```js
-function minDepth(root) {
-  if (root === null) return 0;
-
-  // ловушка: у узла с одним потомком нельзя брать min(0, x) = 0
-  if (root.left === null) return 1 + minDepth(root.right);
-  if (root.right === null) return 1 + minDepth(root.left);
-
-  return 1 + Math.min(minDepth(root.left), minDepth(root.right));
-}
-```
-
-Для дерева `1 → right: 2` наивный `1 + Math.min(0, 1)` дал бы `1` ❌, но узел `1` **не лист** —
-правильный ответ `2`. Минимальная глубина — это путь до **листа**, а не до `null`.
-
-Отличный пример того, что «симметричное» изменение задачи может изменить логику. На интервью
-такие ловушки любят: попросят max, а потом min.
 
 </details>

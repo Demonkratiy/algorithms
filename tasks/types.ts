@@ -14,7 +14,7 @@ export type ComplexityDefinition = {
 export type ComplexityChoices = Record<string, string>;
 
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
-export type Comparison = 'exact' | 'unordered' | 'nested-unordered';
+export type Comparison = 'exact' | 'unordered' | 'nested-unordered' | 'unordered-tuples' | 'closest-points';
 export type FunctionCase = { name: string; args: JsonValue[]; expected: JsonValue };
 export type FunctionRunner = {
   kind: 'function';
@@ -29,11 +29,25 @@ export type ClassCase = {
   name: string;
   instances: JsonValue[][];
   calls: ClassCall[];
+  factories?: ComparatorFactory[];
 };
-export type ClassCall = { instance: number; method: string; args: JsonValue[] } & (
-  { expected: JsonValue; ignoreReturn?: never } | { ignoreReturn: true; expected?: never }
+export type ComparatorFactory = { instance: number; argument: number; direction: 'asc' | 'desc' } & (
+  { kind: 'number'; property?: never } | { kind: 'property'; property: string }
 );
-export type ClassRunner = { kind: 'class'; entryPoint: string; cases: ClassCase[] };
+export type ClassCall = { instance: number } & (
+  { method: string; args: JsonValue[]; property?: never } | { property: string; method?: never; args?: never }
+) & (
+  { expected: JsonValue; ignoreReturn?: never; expectedUndefined?: never }
+  | { ignoreReturn: true; expected?: never; expectedUndefined?: never }
+  | { expectedUndefined: true; expected?: never; ignoreReturn?: never }
+);
+export type ClassRunner = {
+  kind: 'class';
+  entryPoint: string;
+  factoryMethod?: string;
+  preserveArgs?: number[];
+  cases: ClassCase[];
+};
 export type ListInput = { values: number[]; cycleAt?: number };
 export type NodeReference = { list: number; index: number };
 export type ListExpectation =
@@ -58,5 +72,6 @@ export type TaskDefinition = {
   title: string;
   starter: string;
   complexity: ComplexityDefinition;
+  verificationNote?: string;
   runner: FunctionRunner | ClassRunner | LinkedListRunner;
 };

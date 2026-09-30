@@ -42,14 +42,12 @@ for (const [id, code] of Object.entries(solutions)) {
   });
 }
 
-test('cycle requires both A and B, not just successful boolean detection', async ({ page }) => {
+test('cycle detection and cycle entry are independently checkable tasks', async ({ page }) => {
   const onlyA = `const hasCycle = (() => { ${linkedListSolutions['linked-list-cycle']}; return hasCycle; })();`;
   const result = await run(page, 'linked-list-cycle', onlyA);
-  expect(result.status).toBe('error');
-  expect(result.error?.message).toContain('detectCycle');
-  expect(result.cases.length).toBeGreaterThan(1);
-  expect(result.cases.slice(0, -1).every(item => item.passed)).toBe(true);
-  expect(result.cases.at(-1)?.error?.name).toBe('TypeError');
+  expect(result.status).toBe('passed');
+  expect((await run(page, 'linked-list-cycle-entry', onlyA)).status).toBe('error');
+  expect((await run(page, 'linked-list-cycle-entry', linkedListSolutions['linked-list-cycle-entry'])).status).toBe('passed');
 });
 
 test('returning copied middle or cycle-entry nodes fails even with identical values', async ({ page }) => {
@@ -59,14 +57,14 @@ test('returning copied middle or cycle-entry nodes fails even with identical val
     return head => { const node = original(head); return node === null ? null : new ListNode(node.val, node.next); };
   })();`;
   expect((await run(page, 'middle-of-list', middle)).status).toBe('failed');
-  const cycle = `const { hasCycle, detectCycle } = (() => {
-    ${linkedListSolutions['linked-list-cycle']};
+  const cycle = `const detectCycle = (() => {
+    ${linkedListSolutions['linked-list-cycle-entry']};
     const original = detectCycle;
-    return { hasCycle, detectCycle: head => {
+    return head => {
       const node = original(head); return node === null ? null : new ListNode(node.val, node.next);
-    } };
+    };
   })();`;
-  expect((await run(page, 'linked-list-cycle', cycle)).status).toBe('failed');
+  expect((await run(page, 'linked-list-cycle-entry', cycle)).status).toBe('failed');
 });
 
 test('cyclic list output is rejected promptly, and the next run starts with fresh nodes', async ({ page }) => {

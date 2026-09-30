@@ -26,8 +26,8 @@ export const linkedListSolutions: Record<string, string> = {
       if (slow === fast) return true;
     }
     return false;
-  }
-  function detectCycle(head) {
+  }`,
+  'linked-list-cycle-entry': `function detectCycle(head) {
     let slow = head, fast = head;
     while (fast !== null && fast.next !== null) {
       slow = slow.next;
@@ -152,8 +152,10 @@ export const linkedListWrongSolutions: Record<string, string[]> = {
     }`,
     `${linkedListSolutions['linked-list-cycle']}
     function hasCycle(head) { return head !== null; }`,
-    linkedListSolutions['linked-list-cycle'].replace('return entry;', 'return new ListNode(entry.val, entry.next);'),
-    `${linkedListSolutions['linked-list-cycle']}
+  ],
+  'linked-list-cycle-entry': [
+    linkedListSolutions['linked-list-cycle-entry'].replace('return entry;', 'return new ListNode(entry.val, entry.next);'),
+    `${linkedListSolutions['linked-list-cycle-entry']}
     function detectCycle(head) {
       let slow = head, fast = head;
       while (fast !== null && fast.next !== null) {
@@ -163,7 +165,7 @@ export const linkedListWrongSolutions: Record<string, string[]> = {
       }
       return null;
     }`,
-    `${linkedListSolutions['linked-list-cycle']}
+    `${linkedListSolutions['linked-list-cycle-entry']}
     function detectCycle(head) {
       const values = new Set();
       while (head !== null) {

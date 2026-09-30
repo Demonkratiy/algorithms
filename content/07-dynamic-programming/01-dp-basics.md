@@ -228,12 +228,12 @@ function robOptimized(nums) {
 
 **🔴 Основные (обязательно):**
 1. [`01-climbing-stairs`](../practice/07-dynamic-programming/01-dp-basics/01-climbing-stairs.md) — «вход» в DP, три формы записи.
-2. [`02-house-robber`](../practice/07-dynamic-programming/01-dp-basics/02-house-robber.md) — «взять или не взять» (разобрана выше — пиши по памяти).
-3. [`03-coin-change`](../practice/07-dynamic-programming/01-dp-basics/03-coin-change.md) — DP по сумме, минимизация; контрпример жадности.
+2. [`02-house-robber`](../practice/07-dynamic-programming/01-dp-basics/02-house-robber.md) — «взять или не взять» (разобрана выше — пиши по памяти). Отдельно: [House Robber II](../practice/07-dynamic-programming/01-dp-basics/02-b-house-robber-ii.md).
+3. [`03-coin-change`](../practice/07-dynamic-programming/01-dp-basics/03-coin-change.md) — DP по сумме, минимизация; контрпример жадности. Отдельно: [Coin Change II](../practice/07-dynamic-programming/01-dp-basics/03-b-coin-change-ii.md).
 
 **⚪ Дополнительные (если есть время):**
 4. [`04-longest-increasing-subsequence`](../practice/07-dynamic-programming/01-dp-basics/04-longest-increasing-subsequence.md) — `O(N²)` и бонус `O(N log N)`.
-5. [`05-unique-paths`](../practice/07-dynamic-programming/01-dp-basics/05-unique-paths.md) — двумерное DP на сетке.
+5. [`05-unique-paths`](../practice/07-dynamic-programming/01-dp-basics/05-unique-paths.md) — двумерное DP на сетке. Отдельно: [Unique Paths II](../practice/07-dynamic-programming/01-dp-basics/05-b-unique-paths-ii.md).
 
 ---
 

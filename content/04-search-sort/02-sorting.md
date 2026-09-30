@@ -198,7 +198,7 @@ function quickSort(arr) {
 3. [`03-kth-largest`](../practice/04-search-sort/02-sorting/03-kth-largest.md) — сортировка vs quickselect.
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-meeting-rooms`](../practice/04-search-sort/02-sorting/04-meeting-rooms.md) — интервалы + подсчёт пересечений.
+4. [`04-meeting-rooms`](../practice/04-search-sort/02-sorting/04-meeting-rooms.md) — Meeting Rooms I, проверка конфликтов; [Meeting Rooms II](../practice/04-search-sort/02-sorting/04-b-meeting-rooms-ii.md) — число переговорок.
 5. [`05-merge-sort-implementation`](../practice/04-search-sort/02-sorting/05-merge-sort-implementation.md) — написать merge sort с нуля.
 
 ---
@@ -234,4 +234,3 @@ function quickSort(arr) {
    только если нужны **сами пары в порядке**, требуется `O(1)` память или массив уже отсортирован.
 
 </details>
-

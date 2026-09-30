@@ -54,14 +54,15 @@
     return undefined
   }
 
-  function unorderedKeys(values, nested) {
+  function unorderedKeys(values, comparison) {
     const normalized = []
     for (const value of values) {
       let key
-      if (nested) {
+      if (comparison === 'nested-unordered' || comparison === 'unordered-tuples') {
         if (!isArray(value)) return undefined
-        const members = unorderedKeys(value, false)
+        const members = comparison === 'nested-unordered' ? unorderedKeys(value, 'unordered') : value.map(primitiveKey)
         if (!members) return undefined
+        if (members.some(item => item === undefined)) return undefined
         key = stringify(members)
       } else {
         key = primitiveKey(value)
@@ -72,16 +73,65 @@
     return apply(arraySort, normalized, [])
   }
 
-  function matches(actual, expected, comparison) {
+  function closestPoints(actual, args) {
+    const [points, k] = args
+    if (!isArray(actual) || actual.length !== k) return false
+    const counts = new Map()
+    const distance = point => point[0] * point[0] + point[1] * point[1]
+    for (const point of points) {
+      const key = stringify(point)
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+    const distances = []
+    for (const point of actual) {
+      if (!isArray(point) || point.length !== 2 || !point.every(value => typeof value === 'number' && finite(value))) return false
+      const key = stringify(point)
+      const remaining = counts.get(key) ?? 0
+      if (!remaining) return false
+      counts.set(key, remaining - 1)
+      push(distances, distance(point))
+    }
+    const ordered = apply(arraySort, points.map(distance), [(a, b) => a - b])
+    apply(arraySort, distances, [(a, b) => a - b])
+    for (let i = 0; i < k; i++) if (distances[i] !== ordered[i]) return false
+    return true
+  }
+
+  function matches(actual, expected, comparison, args) {
     if (comparison === 'exact') return equal(actual, expected)
+    if (comparison === 'closest-points') return closestPoints(actual, args)
     if (!isArray(actual) || !isArray(expected) || actual.length !== expected.length) return false
-    const left = unorderedKeys(actual, comparison === 'nested-unordered')
-    const right = unorderedKeys(expected, comparison === 'nested-unordered')
+    const left = unorderedKeys(actual, comparison)
+    const right = unorderedKeys(expected, comparison)
     return left !== undefined && right !== undefined && equal(left, right)
   }
 
   function describeArgs(args) {
     return join(args.map(value => display(value)), ', ')
+  }
+
+  function classArguments(test, index, describe = false) {
+    const args = describe ? test.instances[index].map(value => display(value)) : clone(test.instances[index])
+    for (const factory of test.factories ?? []) {
+      if (factory.instance !== index) continue
+      const left = factory.direction === 'asc' ? 'a' : 'b'
+      const right = factory.direction === 'asc' ? 'b' : 'a'
+      if (describe) {
+        const field = factory.kind === 'property' ? `[${stringify(factory.property)}]` : ''
+        args[factory.argument] = `(a, b) => ${left}${field} - ${right}${field}`
+      } else {
+        const sign = factory.direction === 'asc' ? 1 : -1
+        args[factory.argument] = factory.kind === 'number'
+          ? (a, b) => sign * (a - b)
+          : (a, b) => sign * (a[factory.property] - b[factory.property])
+      }
+    }
+    return describe ? join(args, ', ') : args
+  }
+
+  function describeCall(call) {
+    return call.property !== undefined ? `a${call.instance}.${call.property}`
+      : `a${call.instance}.${call.method}(${describeArgs(call.args)})`
   }
 
   class ListNode {
@@ -254,8 +304,8 @@
         const input = runner.kind === 'function'
           ? `${runner.entryPoint}(${describeArgs(test.args)})`
           : runner.kind === 'class'
-            ? join(test.instances.map((args, i) => `a${i} = new ${runner.entryPoint}(${describeArgs(args)})`), '; ')
-              + '; ' + join(test.calls.map(call => `a${call.instance}.${call.method}(${describeArgs(call.args)})`), '; ')
+            ? join(test.instances.map((_args, i) => `a${i} = ${runner.factoryMethod ? `${runner.entryPoint}.${runner.factoryMethod}` : `new ${runner.entryPoint}`}(${classArguments(test, i, true)})`), '; ')
+              + '; ' + join(test.calls.map(describeCall), '; ')
             : `${test.entryPoint ?? runner.entryPoint}(${join([
               ...test.lists.map(list => `List(${display(list.values)}${list.cycleAt !== undefined && list.cycleAt >= 0 ? `, cycleAt: ${list.cycleAt}` : ''})`),
               ...(test.args ?? []).map(value => display(value)),
@@ -264,7 +314,7 @@
           name: test.name,
           input: slice(input, 0, 4000),
           expected: runner.kind === 'linked-list' ? expectedLinked(test)
-            : display(runner.kind === 'function' ? test.expected : test.calls.map(call => call.ignoreReturn ? 'без проверки возврата' : call.expected)),
+            : display(runner.kind === 'function' ? test.expected : test.calls.map(call => call.ignoreReturn ? 'без проверки возврата' : call.expectedUndefined ? undefined : call.expected)),
           actual: 'Выполнение теста не завершено.',
           passed: false,
           logs: [],
@@ -275,7 +325,8 @@
           const returned = apply(Entry, undefined, args)
           const actual = runner.output.kind === 'argument' ? args[runner.output.index] : returned
           currentCase.actual = display(actual)
-          currentCase.passed = matches(actual, test.expected, runner.comparison)
+          currentCase.passed = matches(actual, test.expected, runner.comparison, test.args)
+          if (runner.comparison === 'closest-points') currentCase.feedback = 'Порядок точек не важен. При равных расстояниях принимается любой ближайший набор из исходных точек с учётом повторений; ожидаемый ответ — один из примеров.'
           if (runner.preserveArgs?.some(index => !equal(args[index], test.args[index]))) {
             currentCase.passed = false
             currentCase.feedback = 'Изменён входной аргумент, который по условию должен оставаться неизменным.'
@@ -285,17 +336,33 @@
             currentCase.feedback = 'По условию нужно вернуть новый массив, а не ссылку на входной.'
           }
         } else if (runner.kind === 'class') {
-          const instances = test.instances.map(args => new Entry(...clone(args)))
+          const constructionArgs = test.instances.map((_args, index) => classArguments(test, index))
+          const instances = constructionArgs.map(args => runner.factoryMethod
+            ? apply(Entry[runner.factoryMethod], Entry, args) : new Entry(...args))
           const actual = []
           let passed = true
-          for (const call of test.calls) {
-            const value = apply(instances[call.instance][call.method], instances[call.instance], clone(call.args))
+          let mismatch
+          for (let index = 0; index < test.calls.length; index++) {
+            const call = test.calls[index]
+            currentCase.feedback = slice(`Вызов ${index + 1}: ${describeCall(call)}`, 0, 4000)
+            const value = call.property !== undefined ? instances[call.instance][call.property]
+              : apply(instances[call.instance][call.method], instances[call.instance], clone(call.args))
             push(actual, call.ignoreReturn ? 'без проверки возврата' : value)
-            if (!call.ignoreReturn && !equal(value, call.expected)) passed = false
+            if (!call.ignoreReturn && (call.expectedUndefined ? value !== undefined : !equal(value, call.expected))) {
+              passed = false
+              mismatch ??= slice(`Вызов ${index + 1}: ${slice(describeCall(call), 0, 1500)}. Ожидается: ${slice(display(call.expectedUndefined ? undefined : call.expected), 0, 1000)}. Получено: ${slice(display(value), 0, 1000)}.`, 0, 4000)
+            }
           }
           currentCase.actual = display(actual)
           currentCase.passed = passed
-          if (test.calls.some(call => call.ignoreReturn)) currentCase.feedback = 'Для операций без ожидаемого значения возврат не проверяется. Их эффект проверяют последующие вызовы.'
+          if (mismatch) currentCase.feedback = mismatch
+          else if (test.calls.some(call => call.ignoreReturn)) currentCase.feedback = 'Для операций без ожидаемого значения возврат не проверяется. Их эффект проверяют последующие вызовы.'
+          else delete currentCase.feedback
+          if (runner.preserveArgs && constructionArgs.some((args, instance) =>
+            runner.preserveArgs.some(index => !equal(args[index], test.instances[instance][index])))) {
+            currentCase.passed = false
+            currentCase.feedback = 'Исходные данные конструктора/фабрики изменены; по условию их нужно сохранить.'
+          }
         } else {
           const name = test.entryPoint ?? runner.entryPoint
           const entry = entries?.[name]

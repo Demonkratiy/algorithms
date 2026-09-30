@@ -226,7 +226,7 @@ function save(data) {
 
 **Общее правило:** `try/catch` работает с промисами **только вместе с `await`**. Забытый `await`
 превращает обработку ошибок в фикцию — это же объясняет, почему в
-[retry](../04-promises/01-sleep-retry-timeout.md) внутри `try` обязательно `return await fn()`.
+[retry](../04-promises/01-c-retry.md) внутри `try` обязательно `return await fn()`.
 
 </details>
 
@@ -272,7 +272,7 @@ async function handleClick() {
 ```
 
 Более правильное решение — отменять предыдущий запрос через `AbortController`, см.
-[Отмена операций](../04-promises/04-cancellation.md). В React ту же роль играет cleanup в `useEffect`.
+[Поиск без гонки запросов](../04-promises/04-c-latest-search.md). В React ту же роль играет cleanup в `useEffect`.
 
 > 💡 Гонка запросов — **самый частый реальный баг** в асинхронном FE-коде. Умение назвать её
 > самому, без наводящего вопроса, сильно поднимает оценку.

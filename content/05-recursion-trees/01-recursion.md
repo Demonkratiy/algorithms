@@ -208,12 +208,12 @@ function bad(n, memo = new Map()) { ... }   // ✅ новый Map при каж�
 
 **🔴 Основные (обязательно):**
 1. [`01-fibonacci-memo`](../practice/05-recursion-trees/01-recursion/01-fibonacci-memo.md) — база + мемоизация (разобрана выше — пиши по памяти).
-2. [`02-power-and-reverse`](../practice/05-recursion-trees/01-recursion/02-power-and-reverse.md) — линейная рекурсия, две мини-задачи.
+2. [`02-power-and-reverse`](../practice/05-recursion-trees/01-recursion/02-power-and-reverse.md) — Power; [Reverse String](../practice/05-recursion-trees/01-recursion/02-b-reverse-string.md) — отдельная разминка.
 3. [`03-subsets`](../practice/05-recursion-trees/01-recursion/03-subsets.md) — **backtracking**, ключевой шаблон перебора.
 
 **⚪ Дополнительные (если есть время):**
 4. [`04-permutations`](../practice/05-recursion-trees/01-recursion/04-permutations.md) — перестановки, backtracking с `used`.
-5. [`05-flatten-nested`](../practice/05-recursion-trees/01-recursion/05-flatten-nested.md) — «фронтендерская» рекурсия по вложенным структурам.
+5. [`05-flatten-nested`](../practice/05-recursion-trees/01-recursion/05-flatten-nested.md) — разворот массива; отдельно [Count Comments](../practice/05-recursion-trees/01-recursion/05-b-count-comments.md) и [Deep Get](../practice/05-recursion-trees/01-recursion/05-c-deep-get.md).
 
 ---
 
@@ -248,4 +248,3 @@ function bad(n, memo = new Map()) { ... }   // ✅ новый Map при каж�
    `[...path]` создаёт **снимок** текущего состояния.
 
 </details>
-

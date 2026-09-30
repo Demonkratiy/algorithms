@@ -165,8 +165,8 @@ function maxProfitMultiple(prices) {
 Файлы в [`practice/07-dynamic-programming/02-greedy/`](../practice/07-dynamic-programming/02-greedy/).
 
 **🔴 Основные (обязательно):**
-1. [`01-best-time-to-buy-sell-stock`](../practice/07-dynamic-programming/02-greedy/01-best-time-to-buy-sell-stock.md) — обе версии: одна сделка и много (разобрана выше — пиши по памяти).
-2. [`02-jump-game`](../practice/07-dynamic-programming/02-greedy/02-jump-game.md) — «дойдёшь ли до конца», жадность по достижимости.
+1. [`01-best-time-to-buy-sell-stock`](../practice/07-dynamic-programming/02-greedy/01-best-time-to-buy-sell-stock.md) — одна сделка (разобрана выше — пиши по памяти); [Stock II](../practice/07-dynamic-programming/02-greedy/01-b-stock-ii.md) — отдельная задача про много сделок.
+2. [`02-jump-game`](../practice/07-dynamic-programming/02-greedy/02-jump-game.md) — «дойдёшь ли до конца», жадность по достижимости; [Jump Game II](../practice/07-dynamic-programming/02-greedy/02-b-jump-game-ii.md) — минимальное число прыжков.
 
 **⚪ Дополнительные (если есть время):**
 3. [`03-non-overlapping-intervals`](../practice/07-dynamic-programming/02-greedy/03-non-overlapping-intervals.md) — классический greedy по интервалам.

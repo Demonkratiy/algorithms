@@ -15,7 +15,9 @@
 - `peek()` — посмотреть минимум без извлечения, `O(1)`;
 - `size` — количество элементов.
 
-**Бонус:** поддержка компаратора, чтобы получить max-heap и очередь с приоритетом.
+Продолжение вынесено в отдельную задачу: [Heap Comparator](01-b-heap-comparator.md).
+
+Продолжение вынесено в отдельную задачу: [Heapify за O(N)](01-c-heapify.md).
 
 ## Примеры
 
@@ -30,17 +32,13 @@ heap.peek();     // 1
 heap.pop();      // 1
 heap.pop();      // 3
 heap.size;       // 2
-
-// max-heap через компаратор
-const maxHeap = new MinHeap((a, b) => b - a);
-maxHeap.push(5); maxHeap.push(1); maxHeap.push(9);
-maxHeap.pop();   // 9
 ```
 
 ## 🎯 Требования
 
 - `pop` / `peek` на пустой куче возвращают `undefined`, не бросают ошибку.
 - Дубликаты допустимы.
+- Память `O(N)` для `N` элементов; `size` и `peek` — `O(1)`, `push` и `pop` — `O(log N)`.
 - Внутреннее хранение — обычный массив, без ссылок и объектов-узлов.
 
 ## 🧠 Ментальная модель
@@ -71,8 +69,8 @@ push(1) в [3, 5, 8]:
 3. **`pop` при одном элементе.** После `items.pop()` массив пуст, и записывать `items[0] = last`
    нельзя — куча «воскреснет» с удалённым элементом. Нужна проверка `if (items.length > 0)`.
 4. **Условие остановки во всплытии — нестрогое.** Меняем, только если строго меньше родителя
-   (`compare(...) < 0`); при равенстве — стоп. Со строгим `>` в условии выхода получишь
-   бесконечный цикл на дубликатах.
+   (`child < parent`); при равенстве — стоп. Со строгим `>` в условии выхода получишь
+   лишние обмены на дубликатах (а если забыть менять индекс — бесконечный цикл).
 5. **Обмен через деструктуризацию.** `a[i] = a[j]; a[j] = a[i];` теряет значение.
 6. **Куча не отсортирована** — не пытайся проверять себя сравнением `heap.items` с
    `sorted(array)`. Проверяй последовательностью `pop`.
@@ -109,7 +107,7 @@ push(1) в [3, 5, 8]:
 
 ```js
 class MinHeap {
-  constructor(compare = (a, b) => a - b) {
+  constructor() {
     // пиши здесь
   }
 
@@ -123,12 +121,16 @@ class MinHeap {
 }
 ```
 
+## 🧮 Моя оценка сложности
+
+Время операций: O(?) · Память: O(?)
+
 ## 🧮 Самопроверка
 
 - [ ] `pop` выдаёт элементы по возрастанию
 - [ ] работает с дубликатами
 - [ ] `pop` пустой кучи → `undefined`
-- [ ] компаратор даёт max-heap
+- [ ] `peek` не удаляет минимум
 
 ---
 
@@ -139,9 +141,8 @@ class MinHeap {
 
 ```js
 class MinHeap {
-  constructor(compare = (a, b) => a - b) {
+  constructor() {
     this.items = [];
-    this.compare = compare;                    // < 0 ⇒ a приоритетнее b
   }
 
   get size() {
@@ -158,7 +159,7 @@ class MinHeap {
     let index = this.items.length - 1;
     while (index > 0) {
       const parent = (index - 1) >> 1;
-      if (this.compare(this.items[index], this.items[parent]) >= 0) break;
+      if (this.items[index] >= this.items[parent]) break;
 
       [this.items[index], this.items[parent]] = [this.items[parent], this.items[index]];
       index = parent;
@@ -188,10 +189,10 @@ class MinHeap {
       const right = 2 * index + 2;
       let smallest = index;
 
-      if (left < n && this.compare(this.items[left], this.items[smallest]) < 0) {
+      if (left < n && this.items[left] < this.items[smallest]) {
         smallest = left;
       }
-      if (right < n && this.compare(this.items[right], this.items[smallest]) < 0) {
+      if (right < n && this.items[right] < this.items[smallest]) {
         smallest = right;                      // сравниваем с УЖЕ найденным меньшим
       }
 
@@ -247,44 +248,9 @@ console.log(String(out) === String([...input].sort((a, b) => a - b)));   // true
 const e = new MinHeap();
 console.log(e.pop(), e.peek(), e.size);      // undefined undefined 0
 
-// 3. max-heap
-const mx = new MinHeap((a, b) => b - a);
-[4, 9, 1].forEach((x) => mx.push(x));
-console.log(mx.pop(), mx.pop(), mx.pop());   // 9 4 1
-
-// 4. очередь с приоритетом
-const pq = new MinHeap((a, b) => a.priority - b.priority);
-pq.push({ task: 'low', priority: 5 });
-pq.push({ task: 'urgent', priority: 1 });
-console.log(pq.pop().task);                  // "urgent"
 ```
 
 Первый тест — главный: последовательные `pop` **обязаны** дать отсортированный порядок. Именно
 он ловит ошибку «сравнил только с левым потомком».
-
-</details>
-
-<details>
-<summary>Бонус: heapify за O(N)</summary>
-
-```js
-static heapify(array, compare = (a, b) => a - b) {
-  const heap = new MinHeap(compare);
-  heap.items = [...array];
-
-  // просеиваем вниз все НЕлистовые узлы, начиная с последнего
-  for (let i = (heap.items.length >> 1) - 1; i >= 0; i--) {
-    heap.#siftDownFrom(i);
-  }
-
-  return heap;
-}
-```
-
-Построение кучи из готового массива стоит **`O(N)`**, а не `O(N log N)`: узлов на большой
-глубине много, но их путь просеивания короткий, и сумма сходится к линейной.
-
-Это контринтуитивный факт, который любят спрашивать: _«сколько стоит построить кучу из массива?»_
-— правильный ответ **`O(N)`**.
 
 </details>

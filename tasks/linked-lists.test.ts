@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { reverseLinkedListTask } from './reverse-linked-list/task';
 import { middleOfListTask } from './middle-of-list/task';
 import { linkedListCycleTask } from './linked-list-cycle/task';
+import { linkedListCycleEntryTask } from './linked-list-cycle-entry/task';
 import { mergeTwoSortedListsTask } from './merge-two-sorted-lists/task';
 import { removeNthFromEndTask } from './remove-nth-from-end/task';
 import { palindromeLinkedListTask } from './palindrome-linked-list/task';
@@ -9,7 +10,7 @@ import type { LinkedListCase, LinkedListRunner, ListExpectation, TaskDefinition 
 import { linkedListSolutions, linkedListWrongSolutions } from '../tests/fixtures/linked-lists';
 
 const tasks = [
-  reverseLinkedListTask, middleOfListTask, linkedListCycleTask,
+  reverseLinkedListTask, middleOfListTask, linkedListCycleTask, linkedListCycleEntryTask,
   mergeTwoSortedListsTask, removeNthFromEndTask, palindromeLinkedListTask,
 ];
 
@@ -89,10 +90,11 @@ function independentExpected(taskId: string, runner: LinkedListRunner, sample: L
       };
     case 'middle-of-list':
       return { kind: 'node', node: { list: 0, index: Math.floor(values.length / 2) } };
-    case 'linked-list-cycle': {
+    case 'linked-list-cycle':
+    case 'linked-list-cycle-entry': {
       const cycleAt = sample.lists[0].cycleAt;
       const hasCycle = cycleAt !== undefined && cycleAt >= 0;
-      return (sample.entryPoint ?? runner.entryPoint) === 'hasCycle'
+      return taskId === 'linked-list-cycle'
         ? { kind: 'value', value: hasCycle }
         : { kind: 'node', node: hasCycle ? { list: 0, index: cycleAt } : null };
     }
@@ -116,7 +118,7 @@ function assertDomain(taskId: string, sample: LinkedListCase) {
   expect(sample.lists).toHaveLength(taskId === 'merge-two-sorted-lists' ? 2 : 1);
   for (const list of sample.lists) {
     expect(list.values.every(Number.isSafeInteger)).toBe(true);
-    if (taskId === 'linked-list-cycle') {
+    if (taskId === 'linked-list-cycle' || taskId === 'linked-list-cycle-entry') {
       expect(list.values.length).toBeLessThanOrEqual(10000);
       if (list.cycleAt !== undefined) {
         expect(Number.isInteger(list.cycleAt)).toBe(true);
@@ -191,15 +193,13 @@ describe.each(tasks)('$id', task => {
 });
 
 describe('linked-list contracts', () => {
-  it('keeps both cycle parts in one editor and routes all B cases to detectCycle', () => {
-    const runner = runnerFor(linkedListCycleTask);
+  it('keeps cycle detection and entry in independent tasks', () => {
     expect(linkedListCycleTask.starter).toContain('function hasCycle(head)');
-    expect(linkedListCycleTask.starter).toContain('function detectCycle(head)');
-    expect(runner.cases.filter(sample => sample.name.startsWith('A ·'))).toHaveLength(10);
-    expect(runner.cases.filter(sample => sample.name.startsWith('B ·'))).toHaveLength(10);
-    for (const sample of runner.cases) {
-      expect(sample.entryPoint ?? runner.entryPoint).toBe(sample.name.startsWith('A ·') ? 'hasCycle' : 'detectCycle');
-    }
+    expect(linkedListCycleTask.starter).not.toContain('detectCycle');
+    expect(linkedListCycleEntryTask.starter).toContain('function detectCycle(head)');
+    expect(linkedListCycleEntryTask.starter).not.toContain('hasCycle');
+    expect(runnerFor(linkedListCycleTask).cases).toHaveLength(10);
+    expect(runnerFor(linkedListCycleEntryTask).cases).toHaveLength(10);
   });
 
   it('constructs distinct nodes for equal values, independent lists and fresh executions', () => {

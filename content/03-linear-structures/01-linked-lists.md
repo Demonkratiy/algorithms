@@ -205,7 +205,7 @@ function toArray(head) {
 **🔴 Основные (обязательно):**
 1. [`01-reverse-linked-list`](../practice/03-linear-structures/01-linked-lists/01-reverse-linked-list.md) — три указателя (разобрана выше — пиши по памяти).
 2. [`02-middle-of-list`](../practice/03-linear-structures/01-linked-lists/02-middle-of-list.md) — fast/slow, база для многих задач.
-3. [`03-linked-list-cycle`](../practice/03-linear-structures/01-linked-lists/03-linked-list-cycle.md) — обнаружение цикла (алгоритм Флойда).
+3. [`03-linked-list-cycle`](../practice/03-linear-structures/01-linked-lists/03-linked-list-cycle.md) — обнаружение цикла (алгоритм Флойда); [Cycle Entry](../practice/03-linear-structures/01-linked-lists/03-b-linked-list-cycle-entry.md) — отдельный поиск входа.
 4. [`04-merge-two-sorted-lists`](../practice/03-linear-structures/01-linked-lists/04-merge-two-sorted-lists.md) — dummy node + слияние.
 
 **⚪ Дополнительные (если есть время):**
@@ -242,4 +242,3 @@ function toArray(head) {
    версия использует `O(1)`. На длинном списке рекурсия может дать stack overflow.
 
 </details>
-

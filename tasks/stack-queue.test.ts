@@ -92,6 +92,7 @@ function verifyClassModel(id: string, sample: ClassCase) {
   expect(sample.calls.length).toBeLessThanOrEqual(isStack ? 30000 : 100)
   const states = sample.instances.map(() => [] as number[])
   for (const call of sample.calls) {
+    if (call.property !== undefined) throw new Error('Stack/Queue fixtures use methods, not property reads.')
     expect(Number.isInteger(call.instance) && call.instance >= 0 && call.instance < states.length).toBe(true)
     expect(isStack ? ['push', 'pop', 'top', 'getMin'] : ['push', 'pop', 'peek', 'empty']).toContain(call.method)
     const state = states[call.instance]
@@ -125,8 +126,9 @@ function classPasses(source: string, runner: ClassRunner, sample: ClassCase) {
   const Constructor = load(source, runner.entryPoint)
   const instances = sample.instances.map(args => new Constructor(...structuredClone(args)))
   return sample.calls.every(call => {
-    const actual = instances[call.instance][call.method](...structuredClone(call.args))
-    return call.ignoreReturn === true || equal(actual, call.expected)
+    const actual = call.property !== undefined ? instances[call.instance][call.property]
+      : instances[call.instance][call.method](...structuredClone(call.args))
+    return call.ignoreReturn === true || (call.expectedUndefined ? actual === undefined : equal(actual, call.expected))
   })
 }
 

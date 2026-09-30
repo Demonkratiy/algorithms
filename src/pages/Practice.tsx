@@ -6,7 +6,7 @@ import type { TaskDefinition } from '../../tasks/types';
 import { splitTaskMarkdown } from '../lib/content';
 import { runTask, type RunResult } from '../lib/runner';
 import { useTaskRecord } from '../features/progress/useTaskRecord';
-import type { Attempt } from '../lib/storage';
+import { readRecord, type Attempt } from '../lib/storage';
 import { WorkspacePanels } from '../features/practice/WorkspacePanels';
 import { ComplexityAssessment, ComplexityFeedback } from '../features/practice/ComplexityAssessment';
 import type { ComplexitySnapshot } from '../features/practice/complexity';
@@ -68,9 +68,31 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
   const [complexitySnapshot, setComplexitySnapshot] = useState<ComplexitySnapshot | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState('');
+  const [copying, setCopying] = useState(false);
+  const [copyNotice, setCopyNotice] = useState('');
+  const previousTaskId = task.previousTaskId;
   const abort = useRef<AbortController | null>(null);
   const alive = useRef(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; abort.current?.abort(); }; }, []);
+  async function copyPreviousCode(id: string) {
+    setCopying(true); setError(''); setCopyNotice('');
+    try {
+      const previous = await readRecord(id);
+      if (!alive.current) return;
+      if (!previous) {
+        setError('В прежней общей задаче пока нет сохранённого кода.');
+        return;
+      }
+      if (!confirm('Заменить код этой задачи кодом из прежней общей задачи? История источника останется без изменений.')) return;
+      update(current => ({ ...current, code: previous.code }));
+      setResult(null); setComplexitySnapshot(null);
+      setCopyNotice('Код скопирован. Эта часть проверяется отдельно; история прежних запусков осталась в исходной задаче.');
+    } catch (e) {
+      if (alive.current) setError(`Не удалось скопировать прежний код: ${String(e)}`);
+    } finally {
+      if (alive.current) setCopying(false);
+    }
+  }
   async function execute() {
     if (running) return;
     setError(''); setRunning(true); setResult(null); setComplexitySnapshot(null);
@@ -102,6 +124,13 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
         <div className="badges"><span className="badge green">Проверка в браузере</span>{record.solved && <span className="badge green">Есть успешная проверка</span>}</div></div>
       <span className="small muted">Код не отправляется на сервер</span>
     </div>
+    {previousTaskId && <div className="notice small">
+      Раньше эта часть входила в <Link to={`/task/${previousTaskId}`}>общую задачу</Link>. Старый код и история сохранены там.
+      {' '}<button className="button small" disabled={!ready || running || copying}
+        onClick={() => void copyPreviousCode(previousTaskId)}>{copying ? 'Загружаем код…' : 'Взять прежний код'}</button>
+      {copyNotice && <p role="status">{copyNotice}</p>}
+    </div>}
+    {definition.verificationNote && <p className="notice small">{definition.verificationNote}</p>}
     {storageError && <div className="error" role="alert">{storageError}<button className="button small" onClick={() => update(p => p)}>Повторить сохранение</button></div>}
     {error && <div role="alert" className="error">{error}</div>}
     <WorkspacePanels

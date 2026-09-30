@@ -190,7 +190,7 @@ class MinHeap {
 Файлы в [`practice/04-search-sort/03-heap/`](../practice/04-search-sort/03-heap/).
 
 **🔴 Основные (обязательно):**
-1. [`01-implement-min-heap`](../practice/04-search-sort/03-heap/01-implement-min-heap.md) — написать кучу с нуля (разобрана выше — пиши по памяти).
+1. [`01-implement-min-heap`](../practice/04-search-sort/03-heap/01-implement-min-heap.md) — числовая куча с нуля (разобрана выше — пиши по памяти). Отдельно: [Comparator](../practice/04-search-sort/03-heap/01-b-heap-comparator.md) и [Heapify](../practice/04-search-sort/03-heap/01-c-heapify.md).
 
 **⚪ Дополнительные (если есть время):**
 2. [`02-k-closest-points`](../practice/04-search-sort/03-heap/02-k-closest-points.md) — «k ближайших», три подхода на сравнение.

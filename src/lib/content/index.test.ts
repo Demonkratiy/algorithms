@@ -1,8 +1,10 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { topics } from '../../../content/course';
+import { getTaskDefinition, taskDefinitions } from '../../../tasks';
 import { getMarkdown, splitTaskMarkdown } from './index';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -15,6 +17,15 @@ function markdownFiles(directory: string): string[] {
     const path = join(directory, entry.name);
     return entry.isDirectory() ? markdownFiles(path) : path.endsWith('.md') ? [path] : [];
   });
+}
+
+function reference<T>(id: string, symbol: string, context: Record<string, unknown> = {}, block = 0): T {
+  const task = tasks.find((entry) => entry.id === id)!;
+  const markdown = normalize(readFileSync(join(content, task.path), 'utf8'));
+  const { solution } = splitTaskMarkdown(markdown);
+  const source = [...solution.matchAll(/```js\n([\s\S]*?)\n```/g)][block]?.[1];
+  if (!source) throw new Error(`Missing reference code: ${id}`);
+  return runInNewContext(`${source}\n${symbol}`, context, { timeout: 1000 }) as T;
 }
 
 describe('splitTaskMarkdown', () => {
@@ -81,14 +92,14 @@ PRIVATE`);
 });
 
 describe('course catalog and migration', () => {
-  it('covers exactly 22 theory topics and 79 tasks with stable unique IDs and paths', () => {
+  it('covers exactly 22 theory topics and 100 tasks with stable unique IDs and paths', () => {
     expect(topics).toHaveLength(22);
-    expect(tasks).toHaveLength(79);
+    expect(tasks).toHaveLength(100);
     const entries = [...topics, ...tasks];
     expect(new Set(entries.map((entry) => entry.id)).size).toBe(entries.length);
     for (const entry of entries) expect(entry.id).toMatch(/^[a-z][a-z0-9-]*$/);
     const paths = [...topics.map((topic) => topic.theoryPath), ...tasks.map((task) => task.path)];
-    expect(new Set(paths).size).toBe(101);
+    expect(new Set(paths).size).toBe(122);
     for (const path of paths) {
       expect(path).not.toMatch(/^\/|\\|(?:^|\/)\.\.(?:\/|$)/);
       expect(existsSync(join(content, path)), path).toBe(true);
@@ -101,14 +112,54 @@ describe('course catalog and migration', () => {
       .map((path) => relative(content, path).replaceAll('\\', '/'))
       .filter((path) => /^0[1-8]-/.test(path));
     expect(topics.map((topic) => topic.theoryPath).sort()).toEqual(theoryPaths.sort());
-    expect(tasks.filter((task) => task.runnable).map((task) => task.id)).toEqual([
-      'valid-palindrome', 'move-zeroes', 'merge-sorted-arrays',
-      'min-subarray-sum', 'max-vowels', 'longest-substring',
-      'first-unique-char', 'valid-anagram', 'group-anagrams', 'top-k-frequent',
-      'range-sum-query', 'subarray-sum-k', 'pivot-index', 'product-except-self', 'subarray-sums-divisible-by-k',
-      'reverse-linked-list', 'middle-of-list', 'linked-list-cycle', 'merge-two-sorted-lists', 'remove-nth-from-end', 'palindrome-linked-list',
-      'valid-parentheses', 'min-stack', 'daily-temperatures', 'evaluate-rpn', 'queue-via-stacks',
-    ]);
+    expect(tasks.filter((task) => task.runnable).map((task) => task.id).sort())
+      .toEqual(taskDefinitions.map((definition) => definition.id).sort());
+    for (const task of tasks) {
+      expect(task.runnable, task.id).toBe(getTaskDefinition(task.id) !== undefined);
+    }
+  });
+
+  it('keeps split parts adjacent with explicit previous draft links and original paths', () => {
+    const splits = [
+      ['linked-list-cycle', 'practice/03-linear-structures/01-linked-lists/03-linked-list-cycle.md', ['linked-list-cycle-entry']],
+      ['meeting-rooms', 'practice/04-search-sort/02-sorting/04-meeting-rooms.md', ['meeting-rooms-ii']],
+      ['implement-min-heap', 'practice/04-search-sort/03-heap/01-implement-min-heap.md', ['heap-comparator', 'heapify']],
+      ['power-and-reverse', 'practice/05-recursion-trees/01-recursion/02-power-and-reverse.md', ['reverse-string']],
+      ['flatten-nested', 'practice/05-recursion-trees/01-recursion/05-flatten-nested.md', ['count-comments', 'deep-get']],
+      ['max-depth', 'practice/05-recursion-trees/02-binary-trees/01-max-depth.md', ['min-depth']],
+      ['lowest-common-ancestor', 'practice/05-recursion-trees/02-binary-trees/06-lowest-common-ancestor.md', ['lowest-common-ancestor-binary-tree']],
+      ['house-robber', 'practice/07-dynamic-programming/01-dp-basics/02-house-robber.md', ['house-robber-ii']],
+      ['coin-change', 'practice/07-dynamic-programming/01-dp-basics/03-coin-change.md', ['coin-change-ii']],
+      ['unique-paths', 'practice/07-dynamic-programming/01-dp-basics/05-unique-paths.md', ['unique-paths-ii']],
+      ['best-time-to-buy-sell-stock', 'practice/07-dynamic-programming/02-greedy/01-best-time-to-buy-sell-stock.md', ['stock-ii']],
+      ['jump-game', 'practice/07-dynamic-programming/02-greedy/02-jump-game.md', ['jump-game-ii']],
+      ['sleep-retry-timeout', 'practice/08-js-interview/04-promises/01-sleep-retry-timeout.md', ['with-timeout', 'retry']],
+      ['promise-all', 'practice/08-js-interview/04-promises/03-promise-all.md', ['promise-all-settled', 'promise-race', 'promise-any']],
+      ['cancellation', 'practice/08-js-interview/04-promises/04-cancellation.md', ['fetch-with-abort', 'latest-search']],
+    ] as const;
+    expect(tasks.filter((task) => task.previousTaskId)).toHaveLength(21);
+    for (const [previousId, originalPath, newIds] of splits) {
+      const topic = topics.find((entry) => entry.tasks.some((task) => task.id === previousId))!;
+      const position = topic.tasks.findIndex((task) => task.id === previousId);
+      expect(topic.tasks[position].path).toBe(originalPath);
+      expect(topic.tasks[position].previousTaskId).toBeUndefined();
+      expect(topic.tasks.slice(position + 1, position + 1 + newIds.length).map((task) => task.id))
+        .toEqual(newIds);
+      for (const id of [previousId, ...newIds]) {
+        const task = topic.tasks.find((entry) => entry.id === id)!;
+        if (id !== previousId) expect(task.previousTaskId).toBe(previousId);
+        const markdown = normalize(readFileSync(join(content, task.path), 'utf8'));
+        expect(markdown, id).toContain('## ✍️ Моё решение');
+        expect(markdown, id).toContain('## 🧮 Моя оценка сложности');
+        expect(markdown, id).toContain('## 💡 Подсказки');
+        const parsed = splitTaskMarkdown(markdown);
+        expect(parsed.hints.length, id).toBeGreaterThan(0);
+        expect(parsed.solution, id).toContain('<details>');
+        expect(markdown.trimEnd(), id).toMatch(/<\/details>$/);
+        expect(parsed.statement, id).not.toContain('function hasCycle');
+        expect(parsed.statement, id).not.toContain('function detectCycle');
+      }
+    }
   });
 
   it('keeps all migrated relative Markdown links valid', () => {
@@ -165,7 +216,7 @@ describe('course catalog and migration', () => {
         expect(result.statement).not.toContain(result.solution);
       }
     }
-    expect(references).toBe(69);
+    expect(references).toBe(90);
   });
 });
 
@@ -173,6 +224,176 @@ describe('getMarkdown', () => {
   it('returns theory unchanged', async () => {
     const path = topics[0].theoryPath;
     expect(await getMarkdown(path)).toBe(readFileSync(join(content, path), 'utf8'));
+  });
+
+  describe('split reference material', () => {
+    it('keeps comparator and heapify examples complete for numbers and objects', () => {
+      type Item = number | { priority: number };
+      type Heap = { size: number; pop(): Item | undefined; peek(): Item | undefined; push(value: Item): void };
+      type HeapConstructor = {
+        new(compare?: (a: Item, b: Item) => number): Heap;
+        heapify(items: Item[], compare?: (a: Item, b: Item) => number): Heap;
+      };
+      const drain = (heap: Heap) => {
+        const values: Item[] = [];
+        while (heap.size) values.push(heap.pop()!);
+        expect(heap.pop()).toBeUndefined();
+        expect(heap.peek()).toBeUndefined();
+        return values;
+      };
+      const Heap = reference<HeapConstructor>('heap-comparator', 'MinHeap');
+      const descending = new Heap((a, b) => Number(b) - Number(a));
+      [3, 9, 3, -2].forEach((value) => descending.push(value));
+      expect(drain(descending)).toEqual([9, 3, 3, -2]);
+      const objects = [{ priority: 5 }, { priority: 1 }];
+      const queue = new Heap((a, b) => (a as { priority: number }).priority - (b as { priority: number }).priority);
+      objects.forEach((value) => queue.push(value));
+      expect(queue.pop()).toBe(objects[1]);
+      expect(queue.pop()).toBe(objects[0]);
+      const Builder = reference<HeapConstructor>('heapify', 'MinHeap');
+      const input = Array.from({ length: 512 }, (_, i) => 512 - i);
+      let comparisons = 0;
+      const built = Builder.heapify(input, (a, b) => { comparisons++; return Number(a) - Number(b); });
+      expect(comparisons).toBeLessThan(input.length * 4);
+      expect(input[0]).toBe(512);
+      expect(drain(built)).toEqual([...input].sort((a, b) => a - b));
+      expect(drain(Builder.heapify([]))).toEqual([]);
+    });
+
+    it('retains independent array, recursion and DP reference contracts', () => {
+      expect(reference<(input: unknown[], depth?: number) => unknown[]>('flatten-nested', 'flatten')([1, [2, [3]]], 1))
+        .toEqual([1, 2, [3]]);
+      expect(reference<(input: string) => string>('reverse-string', 'reverseString')('hello')).toBe('olleh');
+      expect(reference<(input: unknown[]) => number>('count-comments', 'countComments')([{ replies: [{ id: 2 }] }, { id: 3 }])).toBe(3);
+      expect(reference<(obj: unknown, path: string) => unknown>('deep-get', 'deepGet')({ a: null }, 'a.b')).toBeUndefined();
+      expect(reference<(input: number[]) => number>('stock-ii', 'maxProfitMultiple')([7, 1, 5, 3, 6, 4])).toBe(7);
+      expect(reference<(input: number[]) => number>('jump-game-ii', 'jump')([0])).toBe(0);
+      expect(reference<(input: number[][]) => number>('meeting-rooms-ii', 'minMeetingRooms')([[1, 5], [5, 8]])).toBe(1);
+      expect(reference<(input: number[]) => number>('house-robber-ii', 'robCircular', {}, 2)([2, 1, 1, 2])).toBe(3);
+      expect(reference<(amount: number, coins: number[]) => number>('coin-change-ii', 'change')(5, [1, 2, 5])).toBe(4);
+      const paths = reference<(grid: number[][]) => number>('unique-paths-ii', 'uniquePathsWithObstacles');
+      expect(paths([[0, 0, 0], [0, 1, 0], [0, 0, 0]])).toBe(2);
+      expect(paths([[1]])).toBe(0);
+      expect(paths([[0, 1, 0]])).toBe(0);
+    });
+
+    it('returns original node identities for cycle entry and LCA, and counts minimum leaf depth', () => {
+      type ListNode = { val: number; next: ListNode | null };
+      const head: ListNode = { val: 1, next: null };
+      const entry: ListNode = { val: 1, next: null };
+      head.next = entry;
+      entry.next = entry;
+      const detectCycle = reference<(node: ListNode | null) => ListNode | null>('linked-list-cycle-entry', 'detectCycle');
+      expect(detectCycle(head)).toBe(entry);
+      expect(detectCycle(null)).toBeNull();
+      entry.next = null;
+      expect(detectCycle(head)).toBeNull();
+      type TreeNode = { val: number; left: TreeNode | null; right: TreeNode | null };
+      const child: TreeNode = { val: 2, left: null, right: null };
+      const root: TreeNode = { val: 1, left: null, right: child };
+      expect(reference<(root: TreeNode) => number>('min-depth', 'minDepth')(root)).toBe(2);
+      const lca = reference<(root: TreeNode, p: TreeNode, q: TreeNode) => TreeNode>(
+        'lowest-common-ancestor-binary-tree', 'lowestCommonAncestor', {}, 1,
+      );
+      expect(lca(root, root, child)).toBe(root);
+    });
+
+    it('handles independent combinator empty-input and rejection semantics', async () => {
+      const settled = reference<(input: unknown[]) => Promise<unknown>>('promise-all-settled', 'myAllSettled');
+      await expect(settled([1, Promise.reject('x')])).resolves.toEqual([
+        { status: 'fulfilled', value: 1 }, { status: 'rejected', reason: 'x' },
+      ]);
+      await expect(settled([])).resolves.toEqual([]);
+      const any = reference<(input: unknown[]) => Promise<unknown>>('promise-any', 'myAny');
+      await expect(any([Promise.reject('x'), 2])).resolves.toBe(2);
+      await expect(any([])).rejects.toMatchObject({ name: 'AggregateError', errors: [] });
+      await expect(any([Promise.reject('a'), Promise.reject('b')])).rejects.toMatchObject({ errors: ['a', 'b'] });
+      const race = reference<(input: unknown[]) => Promise<unknown>>('promise-race', 'myRace');
+      await expect(race([Promise.reject('first'), Promise.resolve('later')])).rejects.toBe('first');
+      const marker = {};
+      expect(await Promise.race([race([]), Promise.resolve(marker)])).toBe(marker);
+    });
+
+    it('settles logical cancellation immediately and suppresses late results', async () => {
+      type Cancelled = { promise: Promise<unknown>; cancel(): void };
+      const cancellable = reference<(factory: () => unknown) => Cancelled>('cancellation', 'cancellable');
+      const pending = cancellable(() => new Promise(() => {}));
+      pending.cancel();
+      pending.cancel();
+      await expect(pending.promise).rejects.toMatchObject({ name: 'CancelledError' });
+      const done = cancellable(() => 42);
+      await expect(done.promise).resolves.toBe(42);
+      done.cancel();
+      await expect(done.promise).resolves.toBe(42);
+      let fail!: (reason: unknown) => void;
+      const late = cancellable(() => new Promise((_, reject) => { fail = reject; }));
+      late.cancel();
+      await expect(late.promise).rejects.toMatchObject({ name: 'CancelledError' });
+      fail(new Error('late failure'));
+      await Promise.resolve();
+    });
+
+    it('separates timeout cleanup from retry attempt counting', async () => {
+      const withTimeout = reference<(promise: Promise<unknown>, ms: number) => Promise<unknown>>(
+        'with-timeout', 'withTimeout', { setTimeout, clearTimeout },
+      );
+      await expect(withTimeout(Promise.resolve('ok'), 50)).resolves.toBe('ok');
+      await expect(withTimeout(new Promise(() => {}), 0)).rejects.toMatchObject({ message: 'Timeout after 0ms' });
+      const pauses: number[] = [];
+      const retry = reference<(fn: () => unknown, options: { attempts: number; delay: number; backoff: number }) => Promise<unknown>>(
+        'retry', 'retry', { sleep: async (ms: number) => { pauses.push(ms); } },
+      );
+      let calls = 0;
+      const error = new Error('failed');
+      await expect(retry(() => { calls++; throw error; }, { attempts: 3, delay: 2, backoff: 2 })).rejects.toBe(error);
+      expect(calls).toBe(3);
+      expect(pauses).toEqual([2, 4]);
+    });
+
+    it('ignores both stale successes and stale errors even when abort is ignored', async () => {
+      const requests: { signal: AbortSignal; resolve(value: unknown): void; reject(error: unknown): void }[] = [];
+      const rendered: unknown[] = [], errors: unknown[] = [];
+      const search = reference<(query: string) => Promise<void>>('latest-search', 'search', {
+        AbortController,
+        loadData: (_url: string, signal: AbortSignal) => new Promise((resolve, reject) => {
+          requests.push({ signal, resolve, reject });
+        }),
+        render: (value: unknown) => { rendered.push(value); },
+        showError: (error: unknown) => { errors.push(error); },
+      });
+      const first = search('a'), second = search('ab'), third = search('abc');
+      expect(requests[0].signal.aborted).toBe(true);
+      expect(requests[1].signal.aborted).toBe(true);
+      requests[2].resolve('latest');
+      requests[0].resolve('stale');
+      requests[1].reject(new Error('stale error'));
+      await Promise.all([first, second, third]);
+      expect(rendered).toEqual(['latest']);
+      expect(errors).toEqual([]);
+    });
+
+    it('forwards the controller signal and preserves fetch failures', async () => {
+      const controller = new AbortController();
+      const value = { value: 42 };
+      let response: { ok: boolean; status: number; json(): Promise<unknown> } = {
+        ok: true, status: 200, json: async () => value,
+      };
+      let failure: unknown;
+      const fetchWithAbort = reference<(url: string, controller: AbortController) => Promise<unknown>>(
+        'fetch-with-abort', 'fetchWithAbort', {
+          fetch: async (_url: string, options: { signal: AbortSignal }) => {
+            expect(options.signal).toBe(controller.signal);
+            if (failure) throw failure;
+            return response;
+          },
+        },
+      );
+      await expect(fetchWithAbort('/fake', controller)).resolves.toBe(value);
+      response = { ...response, ok: false, status: 500 };
+      await expect(fetchWithAbort('/fake', controller)).rejects.toMatchObject({ message: 'HTTP 500' });
+      failure = new DOMException('Aborted', 'AbortError');
+      await expect(fetchWithAbort('/fake', controller)).rejects.toBe(failure);
+    });
   });
 
   it('rejects missing, non-Markdown, absolute, traversal and personal paths', async () => {

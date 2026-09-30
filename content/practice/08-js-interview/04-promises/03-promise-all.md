@@ -1,4 +1,4 @@
-# Свой Promise.all (и allSettled / race / any)
+# Свой Promise.all
 
 **Тема:** js-interview / async · **Сложность:** medium · **Приоритет:** ⚪ дополнительная
 
@@ -14,7 +14,7 @@
 - отклоняется с **первой** возникшей ошибкой (fail-fast);
 - на пустом массиве — немедленно резолвится с `[]`.
 
-**Бонус:** реализуй `myAllSettled`, `myRace`, `myAny`.
+Самостоятельные дополнительные задачи: [allSettled](03-b-promise-all-settled.md), [race](03-c-promise-race.md), [any](03-d-promise-any.md).
 
 ## Примеры
 
@@ -27,6 +27,12 @@ myPromiseAll([Promise.resolve(1), Promise.reject(new Error('boom'))])
 
 myPromiseAll([]).then(console.log);       // []
 ```
+
+Вход — плотный конечный массив; поддержка произвольных iterable не требуется.
+
+## 🎯 Цель по сложности
+
+`O(N)` служебной работы и памяти, без учёта длительности входных операций.
 
 ## 🎯 Требования
 
@@ -99,6 +105,10 @@ function myPromiseAll(promises) {
 }
 ```
 
+## 🧮 Моя оценка сложности
+
+Время: O(?) · Память: O(?)
+
 ## 🧮 Самопроверка
 
 - [ ] порядок результатов сохраняется
@@ -150,60 +160,6 @@ function myPromiseAll(promises) {
 длины 0 мгновенно делает `length === 6`, хотя выполнена одна задача. Счётчик считает честно.
 
 **Сложность:** `O(N)` подписок, память `O(N)` под результаты.
-
-</details>
-
-<details>
-<summary>myAllSettled, myRace, myAny</summary>
-
-```js
-function myAllSettled(promises) {
-  return myPromiseAll(
-    promises.map((item) =>
-      Promise.resolve(item)
-        .then((value) => ({ status: 'fulfilled', value }))
-        .catch((reason) => ({ status: 'rejected', reason })),   // ошибку "гасим"
-    ),
-  );
-}
-
-function myRace(promises) {
-  return new Promise((resolve, reject) => {
-    for (const item of promises) {
-      Promise.resolve(item).then(resolve, reject);    // кто первый — тот и победил
-    }
-  });
-}
-
-function myAny(promises) {
-  return new Promise((resolve, reject) => {
-    let rejected = 0;
-    const errors = new Array(promises.length);
-
-    if (promises.length === 0) {
-      reject(new AggregateError([], 'All promises were rejected'));
-      return;
-    }
-
-    promises.forEach((item, index) => {
-      Promise.resolve(item).then(resolve, (error) => {
-        errors[index] = error;
-        rejected++;
-        if (rejected === promises.length) {
-          reject(new AggregateError(errors, 'All promises were rejected'));
-        }
-      });
-    });
-  });
-}
-```
-
-`myAllSettled` элегантно выражается через `all`: каждую ошибку превращаем в успешный объект,
-поэтому общий промис никогда не отклоняется. Приём «погасить ошибку, вернув объект» полезен и
-сам по себе.
-
-`myRace` — самый короткий: `.then(resolve, reject)` для всех, а дальше сработает первый
-завершившийся, остальные будут проигнорированы.
 
 </details>
 
