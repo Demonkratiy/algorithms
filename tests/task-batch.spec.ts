@@ -86,7 +86,7 @@ test('unknown task IDs are explicit errors rather than a fallback exercise', asy
 });
 
 test('UI lists runnable tasks and keeps their drafts, histories and choices separate', async ({ page }) => {
-  await expect(page.locator('.notice').first()).toContainText('68 задач');
+  await expect(page.locator('.notice').first()).toContainText('проверкой: 81');
   for (const id of ['valid-palindrome', 'move-zeroes', 'top-k-frequent', 'subarray-sum-k', 'range-sum-query']) {
     await page.goto(`/#/task/${id}`);
     await expect(page.getByRole('button', { name: 'Проверить решение', exact: true })).toBeVisible();

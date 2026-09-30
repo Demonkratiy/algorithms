@@ -6,10 +6,10 @@ JavaScript и выполнение решений прямо в браузере
 ## Возможности
 
 - Все темы и условия доступны для чтения.
-- **68 задач** с Monaco Editor и автоматической проверкой: Two Pointers (3),
+- **81 задача** с Monaco Editor и автоматической проверкой: Two Pointers (3),
   Sliding Window (3), Frequency Counter (4), Prefix Sum (5), Matrix (3),
   Linked Lists (7), Stack & Queue (5), Binary Search (6), Sorting (6), Heap (4),
-  Recursion (8), Binary Trees (8), Graphs (6).
+  Recursion (8), Binary Trees (8), Graphs (6), Dynamic Programming (8), Greedy (5).
   После разделения самостоятельных частей в каталоге 100 задач по 22 темам.
   Остальные задачи явно отмечены как материалы без подключённого runner.
 - Подсказки открываются постепенно, разбор — после отдельного подтверждения.
@@ -57,6 +57,7 @@ npm run test:e2e -- task-batch.spec.ts --grep 'workspace|UI lists'
 npm run test:e2e -- linear-structures.spec.ts --grep workspace
 npm run test:e2e -- search-sort-heap.spec.ts --grep workspace
 npm run test:e2e -- recursion-tree-graph.spec.ts --grep workspace
+npm run test:e2e -- dp-greedy.spec.ts --grep workspace
 npm run test:e2e -- split-drafts.spec.ts
 Remove-Item Env:\ALGO_PREVIEW
 ```

@@ -66,6 +66,19 @@ import { cloneGraphTask } from './clone-graph/task';
 import { wordSearchTask } from './word-search/task';
 import { courseScheduleTask } from './course-schedule/task';
 import { courseScheduleIITask } from './course-schedule-ii/task';
+import { climbingStairsTask } from './climbing-stairs/task';
+import { houseRobberTask } from './house-robber/task';
+import { houseRobberIITask } from './house-robber-ii/task';
+import { coinChangeTask } from './coin-change/task';
+import { coinChangeIITask } from './coin-change-ii/task';
+import { longestIncreasingSubsequenceTask } from './longest-increasing-subsequence/task';
+import { uniquePathsTask } from './unique-paths/task';
+import { uniquePathsIITask } from './unique-paths-ii/task';
+import { bestTimeToBuySellStockTask } from './best-time-to-buy-sell-stock/task';
+import { stockIITask } from './stock-ii/task';
+import { jumpGameTask } from './jump-game/task';
+import { jumpGameIITask } from './jump-game-ii/task';
+import { nonOverlappingIntervalsTask } from './non-overlapping-intervals/task';
 import { validateTask } from './validate';
 import type { TaskDefinition } from './types';
 
@@ -83,6 +96,9 @@ export const taskDefinitions: readonly TaskDefinition[] = [
   fibonacciMemoTask, powerTask, reverseStringTask, subsetsTask, permutationsTask, flattenNestedTask, countCommentsTask, deepGetTask,
   maxDepthTask, minDepthTask, invertTreeTask, levelOrderTask, validateBstTask, diameterTask, lowestCommonAncestorTask, lowestCommonAncestorBinaryTreeTask,
   numberOfIslandsTask, rottingOrangesTask, cloneGraphTask, wordSearchTask, courseScheduleTask, courseScheduleIITask,
+  climbingStairsTask, houseRobberTask, houseRobberIITask, coinChangeTask, coinChangeIITask,
+  longestIncreasingSubsequenceTask, uniquePathsTask, uniquePathsIITask,
+  bestTimeToBuySellStockTask, stockIITask, jumpGameTask, jumpGameIITask, nonOverlappingIntervalsTask,
 ];
 const registry = new Map<string, TaskDefinition>();
 for (const definition of taskDefinitions) {
