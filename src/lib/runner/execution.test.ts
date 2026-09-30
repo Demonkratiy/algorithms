@@ -1,7 +1,7 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import source from './sandbox-worker.js?raw';
-import type { ClassRunner, FunctionRunner, LinkedListRunner, TaskDefinition } from '../../../tasks/types';
+import type { BinaryTreeRunner, ClassRunner, FunctionRunner, GraphCloneRunner, LinkedListRunner, TaskDefinition } from '../../../tasks/types';
 import type { RunResult } from './types';
 import { isRunResult } from './protocol';
 
@@ -172,6 +172,90 @@ describe('linked-list execution contract', () => {
     expect(execute('function solve(head) { return head.next; }', runner).status).toBe('passed');
     expect(execute('function solve(head) { return new ListNode(head.next.val, head.next.next); }', runner).status).toBe('failed');
     expect(execute('function solve(head) { return head; }', runner).status).toBe('failed');
+  });
+
+  describe('tree and graph execution contracts', () => {
+    it('builds compact level-order trees rather than heap-index arrays', () => {
+      const runner: BinaryTreeRunner = { kind: 'binary-tree', entryPoint: 'solve', cases: [{
+        name: 'sparse', tree: [1, null, 2, 3], expected: { kind: 'value', value: 3 },
+      }] };
+      expect(execute('const solve = root => root.right.left.val;', runner).status).toBe('passed');
+    });
+    it('passes and checks original tree-node references', () => {
+      const runner: BinaryTreeRunner = { kind: 'binary-tree', entryPoint: 'solve', cases: [{
+        name: 'node', tree: [1, null, 2, 3], nodeArgs: [3], expected: { kind: 'node', index: 3 },
+      }] };
+      expect(execute('const solve = (root, node) => node;', runner).status).toBe('passed');
+      expect(execute('const solve = (root, node) => new TreeNode(node.val, node.left, node.right);', runner).status).toBe('failed');
+    });
+    it('checks returned structure, cycle safety and optional reuse', () => {
+      const runner: BinaryTreeRunner = { kind: 'binary-tree', entryPoint: 'solve', cases: [{
+        name: 'mirror', tree: [1, null, 2, 3], expected: { kind: 'tree', values: [1, 2, null, null, 3, null, null] },
+      }] };
+      const copy = 'const solve = root => new TreeNode(1, new TreeNode(2, null, new TreeNode(3)));';
+      expect(execute(copy, runner).status).toBe('passed');
+      expect(execute('const solve = root => { root.left=root; return root; };', runner).status).toBe('failed');
+      const reused: BinaryTreeRunner = { ...runner, cases: [{
+        ...runner.cases[0], expected: { kind: 'tree', values: [1, 2, null, null, 3], reuseNodes: true },
+      }] };
+      expect(execute(copy, reused).status).toBe('failed');
+      const valid = 'const solve = root => { root.left=root.right; root.right=null; root.left.right=root.left.left; root.left.left=null; return root; };';
+      expect(execute(valid, reused).status).toBe('passed');
+    });
+    it('does not accept a shared child as a binary tree', () => {
+      const runner: BinaryTreeRunner = { kind: 'binary-tree', entryPoint: 'solve', cases: [{
+        name: 'shared', tree: [1, 2, 2], expected: { kind: 'tree', values: [1, 2, 2] },
+      }] };
+      const result = execute('const solve = root => { root.right=root.left; return root; };', runner);
+      expect(result.status).toBe('failed');
+      expect(result.cases[0].feedback).toContain('несколькими родителями');
+    });
+    it('respects an explicit tree preservation contract', () => {
+      const runner: BinaryTreeRunner = { kind: 'binary-tree', entryPoint: 'solve', preserveInput: true, cases: [{
+        name: 'unchanged', tree: [1], expected: { kind: 'value', value: 1 },
+      }] };
+      expect(execute('const solve = root => { root.left=new TreeNode(2); return 1; };', runner).status).toBe('failed');
+    });
+    it('clones graphs with cycles, arbitrary values and an alternate starting node', () => {
+      const runner: GraphCloneRunner = { kind: 'graph-clone', entryPoint: 'solve', cases: [{
+        name: 'cycle', adjacency: [[2], [1]], values: [10, 42], start: 1,
+      }] };
+      const copy = 'const solve = node => { const a=new Node(node.val), b=new Node(node.neighbors[0].val); a.neighbors=[b]; b.neighbors=[a]; return a; };';
+      expect(execute(copy, runner).status).toBe('passed');
+      expect(execute('const solve = node => node;', runner).status).toBe('failed');
+      expect(execute('const solve = node => new Node(node.val, node.neighbors);', runner).status).toBe('failed');
+      const duplicate = 'const solve = node => { const a=new Node(node.val), b=new Node(node.neighbors[0].val), c=new Node(node.val), d=new Node(node.neighbors[0].val); a.neighbors=[b]; b.neighbors=[c]; c.neighbors=[d]; d.neighbors=[a]; return a; };';
+      expect(execute(duplicate, runner).status).toBe('failed');
+    });
+    it('requires a new neighbors array even for a singleton and strict null for an empty graph', () => {
+      const singleton: GraphCloneRunner = { kind: 'graph-clone', entryPoint: 'solve', cases: [{ name: 'one', adjacency: [[]] }] };
+      expect(execute('const solve = node => new Node(node.val);', singleton).status).toBe('passed');
+      expect(execute('const solve = node => new Node(node.val, node.neighbors);', singleton).status).toBe('failed');
+      const empty: GraphCloneRunner = { ...singleton, cases: [{ name: 'empty', adjacency: [] }] };
+      expect(execute('const solve = node => null;', empty).status).toBe('passed');
+      expect(execute('const solve = node => undefined;', empty).status).toBe('failed');
+    });
+    it('accepts different valid topological orders but rejects missing vertices or reversed dependencies', () => {
+      const runner: FunctionRunner = { ...base, comparison: 'topological-order', cases: [{
+        name: 'dag', args: [4, [[2, 0], [2, 1], [3, 2]]], expected: [0, 1, 2, 3],
+      }] };
+      expect(execute('const solve = () => [1,0,2,3];', runner).status).toBe('passed');
+      expect(execute('const solve = () => [0,2,1,3];', runner).status).toBe('failed');
+      expect(execute('const solve = () => [0,1,2,2];', runner).status).toBe('failed');
+      expect(execute('const solve = () => [];', runner).status).toBe('failed');
+      const cyclic: FunctionRunner = { ...runner, cases: [{ name: 'cycle', args: [2, [[1, 0], [0, 1]]], expected: [] }] };
+      expect(execute('const solve = () => [];', cyclic).status).toBe('passed');
+      expect(execute('const solve = () => [0,1];', cyclic).status).toBe('failed');
+    });
+    it('handles undefined and numeric tolerance without coercing wrong types', () => {
+      const missing: FunctionRunner = { ...base, cases: [{ name: 'missing', args: [], expectedUndefined: true }] };
+      expect(execute('const solve = () => undefined;', missing).status).toBe('passed');
+      expect(execute('const solve = () => null;', missing).status).toBe('failed');
+      const approximate: FunctionRunner = { ...base, comparison: 'approximate', tolerance: { absolute: 1e-12, relative: 1e-9 }, cases: [{ name: 'float', args: [], expected: 0.3 }] };
+      expect(execute('const solve = () => 0.1 + 0.2;', approximate).status).toBe('passed');
+      expect(execute('const solve = () => "0.3";', approximate).status).toBe('failed');
+      expect(execute('const solve = () => NaN;', approximate).status).toBe('failed');
+    });
   });
   it('constructs a cycle and checks two entry points in one task', () => {
     const cycle: LinkedListRunner = { kind: 'linked-list', entryPoint: 'hasCycle', cases: [

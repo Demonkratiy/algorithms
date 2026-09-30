@@ -44,6 +44,28 @@ import { implementMinHeapTask } from './implement-min-heap/task';
 import { heapComparatorTask } from './heap-comparator/task';
 import { heapifyTask } from './heapify/task';
 import { kClosestPointsTask } from './k-closest-points/task';
+import { fibonacciMemoTask } from './fibonacci-memo/task';
+import { powerTask } from './power-and-reverse/task';
+import { reverseStringTask } from './reverse-string/task';
+import { subsetsTask } from './subsets/task';
+import { permutationsTask } from './permutations/task';
+import { flattenNestedTask } from './flatten-nested/task';
+import { countCommentsTask } from './count-comments/task';
+import { deepGetTask } from './deep-get/task';
+import { maxDepthTask } from './max-depth/task';
+import { minDepthTask } from './min-depth/task';
+import { invertTreeTask } from './invert-tree/task';
+import { levelOrderTask } from './level-order/task';
+import { validateBstTask } from './validate-bst/task';
+import { diameterTask } from './diameter/task';
+import { lowestCommonAncestorTask } from './lowest-common-ancestor/task';
+import { lowestCommonAncestorBinaryTreeTask } from './lowest-common-ancestor-binary-tree/task';
+import { numberOfIslandsTask } from './number-of-islands/task';
+import { rottingOrangesTask } from './rotting-oranges/task';
+import { cloneGraphTask } from './clone-graph/task';
+import { wordSearchTask } from './word-search/task';
+import { courseScheduleTask } from './course-schedule/task';
+import { courseScheduleIITask } from './course-schedule-ii/task';
 import { validateTask } from './validate';
 import type { TaskDefinition } from './types';
 
@@ -58,6 +80,9 @@ export const taskDefinitions: readonly TaskDefinition[] = [
   binarySearchBasicTask, searchInsertPositionTask, firstLastPositionTask, kokoEatingBananasTask, searchRotatedArrayTask, sqrtTask,
   sortColorsTask, mergeIntervalsTask, kthLargestTask, meetingRoomsTask, meetingRoomsIITask, mergeSortImplementationTask,
   implementMinHeapTask, heapComparatorTask, heapifyTask, kClosestPointsTask,
+  fibonacciMemoTask, powerTask, reverseStringTask, subsetsTask, permutationsTask, flattenNestedTask, countCommentsTask, deepGetTask,
+  maxDepthTask, minDepthTask, invertTreeTask, levelOrderTask, validateBstTask, diameterTask, lowestCommonAncestorTask, lowestCommonAncestorBinaryTreeTask,
+  numberOfIslandsTask, rottingOrangesTask, cloneGraphTask, wordSearchTask, courseScheduleTask, courseScheduleIITask,
 ];
 const registry = new Map<string, TaskDefinition>();
 for (const definition of taskDefinitions) {

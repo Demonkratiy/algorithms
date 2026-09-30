@@ -4,8 +4,8 @@ import { getTaskDefinition, taskDefinitions } from './index';
 import { validateTask } from './validate';
 
 describe('runnable task registry', () => {
-  it('enables forty-six tasks without UI-specific metadata', () => {
-    expect(taskDefinitions).toHaveLength(46);
+  it('enables sixty-eight tasks without UI-specific metadata', () => {
+    expect(taskDefinitions).toHaveLength(68);
     const courseTasks = topics.flatMap(topic => topic.tasks);
     expect(courseTasks.filter(task => task.runnable).map(task => task.id).sort()).toEqual(taskDefinitions.map(task => task.id).sort());
     for (const definition of taskDefinitions) {

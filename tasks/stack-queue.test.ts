@@ -132,7 +132,7 @@ function classPasses(source: string, runner: ClassRunner, sample: ClassCase) {
   })
 }
 
-function functionPasses(source: string, runner: FunctionRunner, args: JsonValue[], expected: JsonValue) {
+function functionPasses(source: string, runner: FunctionRunner, args: JsonValue[], expected: JsonValue | undefined) {
   return equal(load(source, runner.entryPoint)(...structuredClone(args)), expected)
 }
 

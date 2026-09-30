@@ -14,8 +14,10 @@ export type ComplexityDefinition = {
 export type ComplexityChoices = Record<string, string>;
 
 export type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
-export type Comparison = 'exact' | 'unordered' | 'nested-unordered' | 'unordered-tuples' | 'closest-points';
-export type FunctionCase = { name: string; args: JsonValue[]; expected: JsonValue };
+export type Comparison = 'exact' | 'unordered' | 'nested-unordered' | 'unordered-tuples' | 'closest-points' | 'approximate' | 'topological-order';
+export type FunctionCase = { name: string; args: JsonValue[] } & (
+  { expected: JsonValue; expectedUndefined?: never } | { expectedUndefined: true; expected?: never }
+);
 export type FunctionRunner = {
   kind: 'function';
   entryPoint: string;
@@ -23,6 +25,7 @@ export type FunctionRunner = {
   comparison: Comparison;
   preserveArgs?: number[];
   freshArray?: boolean;
+  tolerance?: { absolute: number; relative: number };
   cases: FunctionCase[];
 };
 export type ClassCase = {
@@ -67,11 +70,39 @@ export type LinkedListRunner = {
   preserveInputs?: boolean;
   cases: LinkedListCase[];
 };
+export type TreeExpectation =
+  | { kind: 'value'; value: JsonValue }
+  | { kind: 'node'; index: number | null }
+  | { kind: 'tree'; values: (number | null)[]; reuseNodes?: boolean };
+export type BinaryTreeCase = {
+  name: string;
+  tree: (number | null)[];
+  nodeArgs?: number[];
+  args?: JsonValue[];
+  expected: TreeExpectation;
+};
+export type BinaryTreeRunner = {
+  kind: 'binary-tree';
+  entryPoint: string;
+  preserveInput?: boolean;
+  cases: BinaryTreeCase[];
+};
+export type GraphCloneCase = {
+  name: string;
+  adjacency: number[][];
+  values?: number[];
+  start?: number;
+};
+export type GraphCloneRunner = {
+  kind: 'graph-clone';
+  entryPoint: string;
+  cases: GraphCloneCase[];
+};
 export type TaskDefinition = {
   id: string;
   title: string;
   starter: string;
   complexity: ComplexityDefinition;
   verificationNote?: string;
-  runner: FunctionRunner | ClassRunner | LinkedListRunner;
+  runner: FunctionRunner | ClassRunner | LinkedListRunner | BinaryTreeRunner | GraphCloneRunner;
 };
