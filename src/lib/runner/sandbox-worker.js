@@ -23,6 +23,8 @@
   let logsTruncated = false
   let currentCase
 
+  /* SCENARIO_RUNTIME */
+
   function display(value, depth = 0) {
     if (typeof value === 'string') return stringify(slice(value, 0, 1000)) + (value.length > 1000 ? '…' : '')
     if (!isArray(value)) return format(value)
@@ -431,23 +433,29 @@
     return { name: 'Error', message: slice(format(error), 0, 2000) }
   }
 
-  self.onmessage = ({ data }) => {
+  self.onmessage = async ({ data }) => {
     self.onmessage = null
     const startedAt = now()
     const results = []
+    let scenario
     try {
       const runner = data.runner
+      if (runner.kind === 'scenario') scenario = createScenarioEnvironment()
       const names = [...new Set([runner.entryPoint, ...(runner.kind === 'linked-list' ? runner.cases.map(test => test.entryPoint ?? runner.entryPoint) : [])])]
       const exported = join(names.map(name => `${stringify(name)}: typeof ${name} === "function" ? ${name} : undefined`), ', ')
       const helperNames = ['ListNode'], helpers = [ListNode]
       if (runner.kind === 'binary-tree') { push(helperNames, 'TreeNode'); push(helpers, TreeNode) }
       if (runner.kind === 'graph-clone') { push(helperNames, 'Node'); push(helpers, GraphNode) }
-      const entries = new FunctionConstructor(...helperNames, `return (() => {\n${data.code}\n; return {${exported}};\n})()`)(...helpers)
+      const loadEntries = () => new FunctionConstructor(...helperNames, `return (() => {\n${data.code}\n; return {${exported}};\n})()`)(...helpers)
+      const entries = scenario ? undefined : loadEntries()
       const Entry = entries?.[runner.entryPoint]
-      if (runner.kind !== 'linked-list' && typeof Entry !== 'function') throw new TypeError(`Определи ${runner.kind === 'class' ? 'класс' : 'функцию'} ${runner.entryPoint} из стартового шаблона.`)
+      if (!scenario && runner.kind !== 'linked-list' && typeof Entry !== 'function') throw new TypeError(`Определи ${runner.kind === 'class' ? 'класс' : 'функцию'} ${runner.entryPoint} из стартового шаблона.`)
       for (const test of runner.cases) {
         let input, expected
-        if (runner.kind === 'function') {
+        if (runner.kind === 'scenario') {
+          input = test.input
+          expected = test.expected
+        } else if (runner.kind === 'function') {
           input = `${runner.entryPoint}(${describeArgs(test.args)})`
           expected = display(test.expected)
         } else if (runner.kind === 'class') {
@@ -477,7 +485,14 @@
           logs: [],
         }
         push(results, currentCase)
-        if (runner.kind === 'function') {
+        if (scenario) {
+          scenario.reset()
+          const subject = loadEntries()?.[runner.entryPoint]
+          if (typeof subject !== 'function') throw new TypeError(`Определи ${runner.entryPoint} из стартового шаблона.`)
+          const checked = await scenario.run(test.script, subject)
+          currentCase.passed = checked.passed
+          currentCase.actual = slice(checked.actual, 0, 4000)
+        } else if (runner.kind === 'function') {
           const args = clone(test.args)
           const returned = apply(Entry, undefined, args)
           const actual = runner.output.kind === 'argument' ? args[runner.output.index] : returned
@@ -569,6 +584,8 @@
       post({ type: 'result', result: {
         status: 'error', cases: results, logs, logsTruncated, error: described, durationMs: now() - startedAt,
       } })
+    } finally {
+      scenario?.dispose()
     }
   }
 })()

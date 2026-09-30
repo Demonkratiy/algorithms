@@ -12,7 +12,7 @@ describe('local progress', () => {
   });
   it('rejects unsupported versions, corrupt and duplicate records', () => {
     const record = emptyRecord('range-sum-query', '');
-    expect(() => parseBackup('{"version":3,"tasks":[]}')).toThrow();
+    expect(() => parseBackup('{"version":4,"tasks":[]}')).toThrow();
     expect(() => parseBackup(JSON.stringify({ version: 1, tasks: [record, record] }))).toThrow();
     expect(() => parseBackup(JSON.stringify({ version: 1, tasks: [{ ...record, code: null }] }))).toThrow();
     expect(() => parseBackup(JSON.stringify({ version: 1, tasks: [{ ...record, attempts: [{}] }] }))).toThrow();
@@ -27,7 +27,7 @@ describe('local progress', () => {
     legacy.timeComplexity = 'Подготовка: O(N), запрос: O(1)';
     legacy.spaceComplexity = 'O(N)';
     const backup = parseBackup(JSON.stringify({ version: 1, tasks: [legacy] }));
-    expect(backup.version).toBe(2);
+    expect(backup.version).toBe(3);
     expect(backup.tasks[0].complexityChoices).toEqual({});
     expect(backup.tasks[0].timeComplexity).toBe(legacy.timeComplexity);
     expect(backup.tasks[0].spaceComplexity).toBe(legacy.spaceComplexity);

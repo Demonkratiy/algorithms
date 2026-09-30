@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { topics, type CourseTask, type Topic } from '../../content/course';
-import { getTaskDefinition } from '../../tasks';
+import { getTaskDefinition, getQuizDefinition } from '../../tasks';
 import type { TaskDefinition } from '../../tasks/types';
 import { splitTaskMarkdown } from '../lib/content';
-import { runTask, type RunResult } from '../lib/runner';
+import type { RunResult } from '../lib/runner';
 import { useTaskRecord } from '../features/progress/useTaskRecord';
 import { readRecord, type Attempt } from '../lib/storage';
 import { WorkspacePanels } from '../features/practice/WorkspacePanels';
@@ -12,6 +12,7 @@ import { ComplexityAssessment, ComplexityFeedback } from '../features/practice/C
 import type { ComplexitySnapshot } from '../features/practice/complexity';
 import { Markdown, useMarkdown } from '../components/Markdown';
 import { NotFound } from './Learning';
+import { QuizPage } from './Quiz';
 
 const CodeEditor = lazy(() => import('../features/practice/CodeEditor'));
 const statusNames: Record<RunResult['status'], string> = {
@@ -101,6 +102,7 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
     const controller = new AbortController();
     abort.current = controller;
     try {
+      const { runTask } = await import('../lib/runner');
       const report = await runTask(task.id, source, controller.signal);
       if (!alive.current) return;
       setResult(report); setResultCode(source);
@@ -131,6 +133,9 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
       {copyNotice && <p role="status">{copyNotice}</p>}
     </div>}
     {definition.verificationNote && <p className="notice small">{definition.verificationNote}</p>}
+    {definition.runner.kind === 'scenario' && <p className="notice small">
+      Сценарии используют виртуальные таймеры и имитацию сети. Ожидания не занимают реальное время; код и Promise выполняются в изолированном браузерном окружении.
+    </p>}
     {storageError && <div className="error" role="alert">{storageError}<button className="button small" onClick={() => update(p => p)}>Повторить сохранение</button></div>}
     {error && <div role="alert" className="error">{error}</div>}
     <WorkspacePanels
@@ -199,6 +204,8 @@ export function PracticePage() {
   const topic = topics.find(t => t.tasks.some(task => task.id === taskId));
   const task = topic?.tasks.find(t => t.id === taskId);
   if (!topic || !task) return <NotFound />;
+  const quiz = getQuizDefinition(task.id);
+  if (quiz) return <QuizPage key={task.id} task={task} topic={topic} definition={quiz} />;
   const definition = getTaskDefinition(task.id);
   return definition ? <Workspace key={task.id} task={task} topic={topic} definition={definition} /> : <div className="content">
     <div className="notice">Проверка этой задачи ещё не подключена. Условие, подсказки и доступный разбор можно читать уже сейчас.</div>

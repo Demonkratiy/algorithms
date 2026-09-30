@@ -1,13 +1,13 @@
 import { expect, test } from '@playwright/test';
 
-test('course, theory and non-runnable practice are readable', async ({ page }) => {
+test('course, theory and JS practice are available', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Учимся решать, а не запоминать' })).toBeVisible();
   await page.locator('.topic-card').filter({ has: page.getByRole('heading', { name: 'JS Function Utils', exact: true }) }).click();
   await expect(page.locator('.article')).toContainText('JS Function Utils');
   await page.locator('.task-link').filter({ hasText: 'Debounce' }).click();
-  await expect(page.getByText('Проверка этой задачи ещё не подключена.', { exact: false })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Проверить решение' })).toHaveCount(0);
+  await expect(page.getByText('Проверка этой задачи ещё не подключена.', { exact: false })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Проверить решение' })).toBeVisible();
   await page.getByRole('button', { name: 'Разбор', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Показать разбор — я готов' })).toBeVisible();
 });

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { topics } from '../../../content/course';
-import { getTaskDefinition, taskDefinitions } from '../../../tasks';
+import { getTaskDefinition, getQuizDefinition, taskDefinitions, quizDefinitions } from '../../../tasks';
 import { getMarkdown, splitTaskMarkdown } from './index';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -92,14 +92,14 @@ PRIVATE`);
 });
 
 describe('course catalog and migration', () => {
-  it('covers exactly 22 theory topics and 100 tasks with stable unique IDs and paths', () => {
+  it('covers exactly 22 theory topics and 101 activities with stable unique IDs and paths', () => {
     expect(topics).toHaveLength(22);
-    expect(tasks).toHaveLength(100);
+    expect(tasks).toHaveLength(101);
     const entries = [...topics, ...tasks];
     expect(new Set(entries.map((entry) => entry.id)).size).toBe(entries.length);
     for (const entry of entries) expect(entry.id).toMatch(/^[a-z][a-z0-9-]*$/);
     const paths = [...topics.map((topic) => topic.theoryPath), ...tasks.map((task) => task.path)];
-    expect(new Set(paths).size).toBe(122);
+    expect(new Set(paths).size).toBe(123);
     for (const path of paths) {
       expect(path).not.toMatch(/^\/|\\|(?:^|\/)\.\.(?:\/|$)/);
       expect(existsSync(join(content, path)), path).toBe(true);
@@ -113,9 +113,9 @@ describe('course catalog and migration', () => {
       .filter((path) => /^0[1-8]-/.test(path));
     expect(topics.map((topic) => topic.theoryPath).sort()).toEqual(theoryPaths.sort());
     expect(tasks.filter((task) => task.runnable).map((task) => task.id).sort())
-      .toEqual(taskDefinitions.map((definition) => definition.id).sort());
+      .toEqual([...taskDefinitions, ...quizDefinitions].map((definition) => definition.id).sort());
     for (const task of tasks) {
-      expect(task.runnable, task.id).toBe(getTaskDefinition(task.id) !== undefined);
+      expect(task.runnable, task.id).toBe(getTaskDefinition(task.id) !== undefined || getQuizDefinition(task.id) !== undefined);
     }
   });
 
@@ -136,8 +136,9 @@ describe('course catalog and migration', () => {
       ['sleep-retry-timeout', 'practice/08-js-interview/04-promises/01-sleep-retry-timeout.md', ['with-timeout', 'retry']],
       ['promise-all', 'practice/08-js-interview/04-promises/03-promise-all.md', ['promise-all-settled', 'promise-race', 'promise-any']],
       ['cancellation', 'practice/08-js-interview/04-promises/04-cancellation.md', ['fetch-with-abort', 'latest-search']],
+      ['throttle', 'practice/08-js-interview/01-function-utils/02-throttle.md', ['throttle-trailing']],
     ] as const;
-    expect(tasks.filter((task) => task.previousTaskId)).toHaveLength(21);
+    expect(tasks.filter((task) => task.previousTaskId)).toHaveLength(22);
     for (const [previousId, originalPath, newIds] of splits) {
       const topic = topics.find((entry) => entry.tasks.some((task) => task.id === previousId))!;
       const position = topic.tasks.findIndex((task) => task.id === previousId);
@@ -216,7 +217,7 @@ describe('course catalog and migration', () => {
         expect(result.statement).not.toContain(result.solution);
       }
     }
-    expect(references).toBe(90);
+    expect(references).toBe(91);
   });
 });
 

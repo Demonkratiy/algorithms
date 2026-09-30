@@ -98,11 +98,18 @@ export type GraphCloneRunner = {
   entryPoint: string;
   cases: GraphCloneCase[];
 };
+export type ScenarioCase = {
+  name: string;
+  input: string;
+  expected: string;
+  script: string;
+};
+export type ScenarioRunner = { kind: 'scenario'; entryPoint: string; cases: ScenarioCase[] };
 export type TaskDefinition = {
   id: string;
   title: string;
   starter: string;
   complexity: ComplexityDefinition;
   verificationNote?: string;
-  runner: FunctionRunner | ClassRunner | LinkedListRunner | BinaryTreeRunner | GraphCloneRunner;
+  runner: FunctionRunner | ClassRunner | LinkedListRunner | BinaryTreeRunner | GraphCloneRunner | ScenarioRunner;
 };

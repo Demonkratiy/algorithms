@@ -35,7 +35,12 @@ export function validateTask(task: TaskDefinition) {
       || [item.expected, ...(item.accepted ?? [])].some(id => !optionIds.has(id) || id === 'unknown'))) fail('неверные цели сложности');
   const caseNames = new Set(runner.cases.map(item => item.name));
   if (caseNames.size !== runner.cases.length || runner.cases.some(item => !item.name || item.name.length > 200)) fail('имена тестов должны быть уникальными');
-  if (runner.kind === 'function') {
+  if (runner.kind === 'scenario') {
+    for (const test of runner.cases) {
+      if (!test.input || test.input.length > 4000 || !test.expected || test.expected.length > 4000
+        || !test.script.trim() || test.script.length > 50_000) fail('неверное описание сценария');
+    }
+  } else if (runner.kind === 'function') {
     if (!['exact', 'unordered', 'nested-unordered', 'unordered-tuples', 'closest-points', 'approximate', 'topological-order'].includes(runner.comparison)) fail('неизвестное сравнение');
     if (runner.tolerance && (!Number.isFinite(runner.tolerance.absolute) || runner.tolerance.absolute < 0
       || !Number.isFinite(runner.tolerance.relative) || runner.tolerance.relative < 0)) fail('неверная погрешность');

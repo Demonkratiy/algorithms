@@ -1,5 +1,6 @@
 import { openDB, type DBSchema } from 'idb';
 import type { ComplexityChoices } from '../../../tasks/types';
+import type { QuizAnswers } from '../../../tasks/quiz-types';
 
 export type Theme = 'light' | 'dark' | 'system';
 export type Settings = { ui: Theme; editor: Theme };
@@ -8,6 +9,8 @@ export type Attempt = {
   code: string;
   mode: 'example' | 'check';
   status: 'passed' | 'failed' | 'error' | 'timeout' | 'cancelled';
+  quizAnswers?: QuizAnswers;
+  quizExplanations?: Record<string, string>;
 };
 export type TaskRecord = {
   taskId: string;
@@ -18,9 +21,11 @@ export type TaskRecord = {
   timeComplexity: string;
   spaceComplexity: string;
   complexityChoices?: ComplexityChoices;
+  quizAnswers?: QuizAnswers;
+  quizExplanations?: Record<string, string>;
 };
-export const BACKUP_VERSION = 2;
-export type Backup = { version: 2; tasks: TaskRecord[] };
+export const BACKUP_VERSION = 3;
+export type Backup = { version: 3; tasks: TaskRecord[] };
 
 interface AlgoDB extends DBSchema {
   tasks: { key: string; value: TaskRecord };
@@ -77,7 +82,15 @@ function validDate(value: unknown): value is string {
 function attempt(value: unknown): value is Attempt {
   return object(value) && validDate(value.at) && text(value.code, 100_000)
     && (value.mode === 'example' || value.mode === 'check')
-    && ['passed', 'failed', 'error', 'timeout', 'cancelled'].includes(String(value.status));
+    && ['passed', 'failed', 'error', 'timeout', 'cancelled'].includes(String(value.status))
+    && (value.quizAnswers === undefined || quizMap(value.quizAnswers, false))
+    && (value.quizExplanations === undefined || quizMap(value.quizExplanations, true));
+}
+function quizMap(value: unknown, explanations: boolean): value is Record<string, string> {
+  return object(value) && Object.keys(value).length <= 30
+    && Object.entries(value).every(([key, answer]) => /^[a-z0-9][a-z0-9-]{0,79}$/.test(key)
+      && text(answer, explanations ? 2000 : 80)
+      && (explanations || /^[a-z0-9][a-z0-9-]*$/.test(answer)));
 }
 function complexityChoices(value: unknown): value is ComplexityChoices {
   return object(value) && Object.keys(value).length <= 20
@@ -88,8 +101,9 @@ function complexityChoices(value: unknown): value is ComplexityChoices {
 export function parseBackup(source: string): Backup {
   if (source.length > 5_000_000) throw new Error('Файл больше 5 МБ.');
   const value: unknown = JSON.parse(source);
-  if (!object(value) || (value.version !== 1 && value.version !== BACKUP_VERSION) || !Array.isArray(value.tasks) || value.tasks.length > 1000) {
-    throw new Error('Неподдерживаемый формат резервной копии. Нужен экспорт Algo версии 1 или 2.');
+  if (!object(value) || ![1, 2, BACKUP_VERSION].includes(Number(value.version)) || !Array.isArray(value.tasks) || value.tasks.length > 1000
+    || typeof value.version !== 'number') {
+    throw new Error('Неподдерживаемый формат резервной копии. Нужен экспорт Algo версии 1, 2 или 3.');
   }
   const ids = new Set<string>();
   const tasks = value.tasks.map((item: unknown): TaskRecord => {
@@ -98,6 +112,8 @@ export function parseBackup(source: string): Backup {
       || typeof item.solved !== 'boolean' || !text(item.timeComplexity, 200)
       || !text(item.spaceComplexity, 200) || !Array.isArray(item.attempts)
       || (item.complexityChoices !== undefined && !complexityChoices(item.complexityChoices))
+      || (item.quizAnswers !== undefined && !quizMap(item.quizAnswers, false))
+      || (item.quizExplanations !== undefined && !quizMap(item.quizExplanations, true))
       || item.attempts.length > 5 || !item.attempts.every(attempt)) {
       throw new Error('Некорректная запись задачи в резервной копии.');
     }
@@ -106,8 +122,12 @@ export function parseBackup(source: string): Backup {
       taskId: item.taskId, code: item.code, updatedAt: item.updatedAt, solved: item.solved,
       timeComplexity: item.timeComplexity, spaceComplexity: item.spaceComplexity,
       complexityChoices: item.complexityChoices === undefined ? {} : { ...item.complexityChoices },
+      ...(item.quizAnswers === undefined ? {} : { quizAnswers: { ...item.quizAnswers } }),
+      ...(item.quizExplanations === undefined ? {} : { quizExplanations: { ...item.quizExplanations } }),
       attempts: item.attempts.map(entry => ({
         at: entry.at, code: entry.code, mode: entry.mode, status: entry.status,
+        ...(entry.quizAnswers === undefined ? {} : { quizAnswers: { ...entry.quizAnswers } }),
+        ...(entry.quizExplanations === undefined ? {} : { quizExplanations: { ...entry.quizExplanations } }),
       })),
     };
   });

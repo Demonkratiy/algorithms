@@ -152,11 +152,12 @@ throttle: ✔     ✔     ✔     ✔    (равномерно, раз в N мс
 
 **🔴 Основные (обязательно):**
 1. [`01-debounce`](../practice/08-js-interview/01-function-utils/01-debounce.md) — база + `cancel` + `immediate` (разобрана выше — пиши по памяти).
-2. [`02-throttle`](../practice/08-js-interview/01-function-utils/02-throttle.md) — два способа реализации, leading/trailing.
+2. [`02-throttle`](../practice/08-js-interview/01-function-utils/02-throttle.md) — только leading, два способа реализации.
+3. [`02-b-throttle-trailing`](../practice/08-js-interview/01-function-utils/02-b-throttle-trailing.md) — отдельная задача: leading + trailing, последние аргументы и новое окно после trailing.
 
 **⚪ Дополнительные (если есть время):**
-3. [`03-curry`](../practice/08-js-interview/01-function-utils/03-curry.md) — каррирование, `fn.length`.
-4. [`04-memoize`](../practice/08-js-interview/01-function-utils/04-memoize.md) — кеш вызовов, выбор ключа.
+4. [`03-curry`](../practice/08-js-interview/01-function-utils/03-curry.md) — каррирование, `fn.length`.
+5. [`04-memoize`](../practice/08-js-interview/01-function-utils/04-memoize.md) — кеш вызовов, выбор ключа.
 
 ---
 

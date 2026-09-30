@@ -1,10 +1,11 @@
-import { getTaskDefinition } from '../tasks';
+import { getTaskDefinition, getQuizDefinition } from '../tasks';
 
 export type CourseTask = {
   id: string;
   title: string;
   path: string;
   runnable: boolean;
+  activity?: 'code' | 'quiz' | 'reading';
   previousTaskId?: string;
 };
 
@@ -18,7 +19,9 @@ export type Topic = {
 
 // IDs are persisted in browser progress. Keep them when renaming/reordering files.
 function task(id: string, title: string, path: string, previousTaskId?: string): CourseTask {
-  return { id, title, path, runnable: getTaskDefinition(id) !== undefined, ...(previousTaskId ? { previousTaskId } : {}) };
+  const code = getTaskDefinition(id) !== undefined;
+  const quiz = getQuizDefinition(id) !== undefined;
+  return { id, title, path, runnable: code || quiz, activity: quiz ? 'quiz' : code ? 'code' : 'reading', ...(previousTaskId ? { previousTaskId } : {}) };
 }
 
 export const topics: Topic[] = [
@@ -213,6 +216,7 @@ export const topics: Topic[] = [
     tasks: [
       task('debounce', 'Debounce', 'practice/08-js-interview/01-function-utils/01-debounce.md'),
       task('throttle', 'Throttle', 'practice/08-js-interview/01-function-utils/02-throttle.md'),
+      task('throttle-trailing', 'Throttle — leading + trailing', 'practice/08-js-interview/01-function-utils/02-b-throttle-trailing.md', 'throttle'),
       task('curry', 'Curry', 'practice/08-js-interview/01-function-utils/03-curry.md'),
       task('memoize', 'Memoize', 'practice/08-js-interview/01-function-utils/04-memoize.md'),
     ],

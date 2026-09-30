@@ -7,7 +7,7 @@ export function CoursePage() {
     <div className="eyebrow">Твой маршрут</div>
     <h1>Учимся решать, а не запоминать</h1>
     <p className="lede">Теория, осознанная практика и проверка на JavaScript. По одному паттерну за раз.</p>
-    <div className="notice">Задач с автоматической проверкой: {topics.flatMap(topic => topic.tasks).filter(task => task.runnable).length}. Они отмечены в разделах курса; остальные доступны для чтения.</div>
+    <div className="notice">Заданий с проверкой: {topics.flatMap(topic => topic.tasks).filter(task => task.runnable).length}. Практика кода и мини-тесты отмечены в разделах курса.</div>
     <Link className="button" to="/read/00-how-to-solve.md">Начать с UMPIRE →</Link>
     <div className="course-grid">{topics.map((topic, index) => <Link className="card topic-card" key={topic.id} to={`/topic/${topic.id}`}>
       <span className="eyebrow">{String(index + 1).padStart(2, '0')} / {topic.section}</span>
@@ -31,7 +31,7 @@ function TopicView({ topic }: { topic: Topic }) {
         <p className="muted small">Сначала своя попытка, затем подсказки и разбор.</p>
         {topic.tasks.map(task => <Link className="task-link" key={task.id} to={`/task/${task.id}`}>
           <strong>{task.title}</strong>
-          <span className={`badge ${task.runnable ? 'green' : ''}`}>{task.runnable ? 'Проверка в браузере' : 'Материал'}</span>
+          <span className={`badge ${task.runnable ? 'green' : ''}`}>{task.activity === 'quiz' ? 'Мини-тест' : task.runnable ? 'Проверка в браузере' : 'Материал'}</span>
         </Link>)}
         {!topic.tasks.length && <p className="muted">Мини-опрос находится в конце заметки.</p>}
         <Link to="/">← Все темы</Link>

@@ -94,7 +94,7 @@ test('choices made during execution do not alter the run snapshot', async ({ pag
   await expect(feedback(page)).toContainText('Сверка устарела');
 });
 
-test('choices survive reload and a version 2 export/import round trip', async ({ page }) => {
+test('choices survive reload and an export/import round trip', async ({ page }) => {
   await seed(page);
   await openAssessment(page);
   await select(page, 'Подготовка — время', 'O(N)');
@@ -112,7 +112,7 @@ test('choices survive reload and a version 2 export/import round trip', async ({
   let source = '';
   for await (const chunk of stream) source += chunk.toString();
   const backup = JSON.parse(source);
-  expect(backup.version).toBe(2);
+  expect(backup.version).toBe(3);
   expect(backup.tasks[0].complexityChoices).toEqual({ 'build-time': 'linear', 'query-space': 'unknown' });
   await seed(page);
   await page.goto('/#/settings');

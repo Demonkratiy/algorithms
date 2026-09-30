@@ -1,6 +1,6 @@
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
-import source from './sandbox-worker.js?raw';
+import { workerSource as source } from './worker-source';
 import type { BinaryTreeRunner, ClassRunner, FunctionRunner, GraphCloneRunner, LinkedListRunner, TaskDefinition } from '../../../tasks/types';
 import type { RunResult } from './types';
 import { isRunResult } from './protocol';

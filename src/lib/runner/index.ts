@@ -1,6 +1,6 @@
 import { getTaskDefinition } from '../../../tasks'
 import frameSource from './sandbox-frame.js?raw'
-import workerSource from './sandbox-worker.js?raw'
+import { workerSource } from './worker-source'
 import { isEnvelope, isRunResult, MAX_CODE_BYTES, RUN_TIMEOUT_MS, SETUP_TIMEOUT_MS } from './protocol'
 import type { RunError, RunResult } from './types'
 

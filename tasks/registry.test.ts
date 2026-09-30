@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { topics } from '../content/course';
-import { getTaskDefinition, taskDefinitions } from './index';
+import { getTaskDefinition, taskDefinitions, quizDefinitions } from './index';
 import { validateTask } from './validate';
 
 describe('runnable task registry', () => {
-  it('enables eighty-one tasks without UI-specific metadata', () => {
-    expect(taskDefinitions).toHaveLength(81);
+  it('enables code exercises and quizzes without task-specific UI metadata', () => {
+    expect(taskDefinitions).toHaveLength(99);
+    expect(quizDefinitions).toHaveLength(2);
     const courseTasks = topics.flatMap(topic => topic.tasks);
-    expect(courseTasks.filter(task => task.runnable).map(task => task.id).sort()).toEqual(taskDefinitions.map(task => task.id).sort());
+    expect(courseTasks.filter(task => task.runnable).map(task => task.id).sort())
+      .toEqual([...taskDefinitions, ...quizDefinitions].map(task => task.id).sort());
     for (const definition of taskDefinitions) {
       expect(() => validateTask(definition)).not.toThrow();
       expect(courseTasks.filter(task => task.id === definition.id)).toHaveLength(1);

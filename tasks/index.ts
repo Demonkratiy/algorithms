@@ -79,8 +79,27 @@ import { stockIITask } from './stock-ii/task';
 import { jumpGameTask } from './jump-game/task';
 import { jumpGameIITask } from './jump-game-ii/task';
 import { nonOverlappingIntervalsTask } from './non-overlapping-intervals/task';
+import { debounceTask } from './debounce/task';
+import { throttleTask } from './throttle/task';
+import { throttleTrailingTask } from './throttle-trailing/task';
+import { curryTask } from './curry/task';
+import { memoizeTask } from './memoize/task';
+import { deepCloneTask } from './deep-clone/task';
+import { eventEmitterTask } from './event-emitter/task';
+import { sleepTask } from './sleep-retry-timeout/task';
+import { withTimeoutTask } from './with-timeout/task';
+import { retryTask } from './retry/task';
+import { promisePoolTask } from './promise-pool/task';
+import { promiseAllTask } from './promise-all/task';
+import { promiseAllSettledTask } from './promise-all-settled/task';
+import { promiseRaceTask } from './promise-race/task';
+import { promiseAnyTask } from './promise-any/task';
+import { cancellationTask } from './cancellation/task';
+import { fetchWithAbortTask } from './fetch-with-abort/task';
+import { latestSearchTask } from './latest-search/task';
 import { validateTask } from './validate';
 import type { TaskDefinition } from './types';
+export { quizDefinitions, getQuizDefinition } from './quizzes';
 
 export const taskDefinitions: readonly TaskDefinition[] = [
   validPalindromeTask, moveZeroesTask, mergeSortedArraysTask,
@@ -99,6 +118,9 @@ export const taskDefinitions: readonly TaskDefinition[] = [
   climbingStairsTask, houseRobberTask, houseRobberIITask, coinChangeTask, coinChangeIITask,
   longestIncreasingSubsequenceTask, uniquePathsTask, uniquePathsIITask,
   bestTimeToBuySellStockTask, stockIITask, jumpGameTask, jumpGameIITask, nonOverlappingIntervalsTask,
+  debounceTask, throttleTask, throttleTrailingTask, curryTask, memoizeTask, deepCloneTask, eventEmitterTask,
+  sleepTask, withTimeoutTask, retryTask, promisePoolTask, promiseAllTask, promiseAllSettledTask,
+  promiseRaceTask, promiseAnyTask, cancellationTask, fetchWithAbortTask, latestSearchTask,
 ];
 const registry = new Map<string, TaskDefinition>();
 for (const definition of taskDefinitions) {
