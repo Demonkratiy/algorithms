@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { topics, type CourseTask, type Topic } from '../../content/course';
-import { rangeSumTask } from '../../tasks/range-sum-query/task';
+import { getTaskDefinition } from '../../tasks';
+import type { TaskDefinition } from '../../tasks/types';
 import { splitTaskMarkdown } from '../lib/content';
 import { runTask, type RunResult } from '../lib/runner';
 import { useTaskRecord } from '../features/progress/useTaskRecord';
@@ -60,8 +61,8 @@ function TaskReading({ task, topic }: { task: CourseTask; topic: Topic }) {
   </article>;
 }
 
-function Workspace({ task, topic }: { task: CourseTask; topic: Topic }) {
-  const { record, ready, update, error: storageError, saving } = useTaskRecord(task.id, rangeSumTask.starter);
+function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic; definition: TaskDefinition }) {
+  const { record, ready, update, error: storageError, saving } = useTaskRecord(task.id, definition.starter);
   const [result, setResult] = useState<RunResult | null>(null);
   const [resultCode, setResultCode] = useState('');
   const [complexitySnapshot, setComplexitySnapshot] = useState<ComplexitySnapshot | null>(null);
@@ -78,7 +79,7 @@ function Workspace({ task, topic }: { task: CourseTask; topic: Topic }) {
     const controller = new AbortController();
     abort.current = controller;
     try {
-      const report = await runTask(source, controller.signal);
+      const report = await runTask(task.id, source, controller.signal);
       if (!alive.current) return;
       setResult(report); setResultCode(source);
       setComplexitySnapshot({ code: source, choices: selectedComplexity, status: report.status });
@@ -112,14 +113,14 @@ function Workspace({ task, topic }: { task: CourseTask; topic: Topic }) {
               if (code.length > 100_000) { setError('Лимит кода — 100 000 символов. Сократи решение.'); return; }
               update(p => ({ ...p, code }));
             }} /></Suspense> : <div className="notice">Загружаем сохранённое решение…</div>}</div>
-            <ComplexityAssessment definition={rangeSumTask.complexity} choices={record.complexityChoices ?? {}}
+            <ComplexityAssessment definition={definition.complexity} choices={record.complexityChoices ?? {}}
               disabled={!ready} onChange={choices => update(p => ({ ...p, complexityChoices: choices }))}
               legacyTime={record.timeComplexity} legacySpace={record.spaceComplexity} />
           </div>
           <div className="editor-actions">
             <button className="button" disabled={!ready || running} onClick={() => {
               if (confirm('Заменить текущий код стартовым шаблоном? Последние запуски останутся в истории.')) {
-                update(p => ({ ...p, code: rangeSumTask.starter })); setResult(null);
+                update(p => ({ ...p, code: definition.starter })); setResult(null);
               }
             }}>Сбросить</button>
             <div className="button-group">
@@ -143,9 +144,10 @@ function Workspace({ task, topic }: { task: CourseTask; topic: Topic }) {
               <p className="small">Вход</p><pre>{test.input}</pre>
               <div className="comparison"><div><span>Ожидается</span><pre>{test.expected}</pre></div><div><span>Получено</span><pre>{test.actual}</pre></div></div>
               {test.error && <pre className="error">{test.error.name}: {test.error.message}</pre>}
+              {test.feedback && <p className="notice small">{test.feedback}</p>}
               <details className="case-console"><summary>Консоль теста ({test.logs.length})</summary><pre>{test.logs.join('\n') || 'Нет сохранённых сообщений.'}</pre></details>
             </details>)}</div>
-            {complexitySnapshot && <ComplexityFeedback definition={rangeSumTask.complexity}
+            {complexitySnapshot && <ComplexityFeedback definition={definition.complexity}
               code={record.code} choices={record.complexityChoices ?? {}} snapshot={complexitySnapshot} />}
           </>}
         </section>}
@@ -168,7 +170,8 @@ export function PracticePage() {
   const topic = topics.find(t => t.tasks.some(task => task.id === taskId));
   const task = topic?.tasks.find(t => t.id === taskId);
   if (!topic || !task) return <NotFound />;
-  return task.runnable ? <Workspace key={task.id} task={task} topic={topic} /> : <div className="content">
+  const definition = getTaskDefinition(task.id);
+  return definition ? <Workspace key={task.id} task={task} topic={topic} definition={definition} /> : <div className="content">
     <div className="notice">Проверка этой задачи ещё не подключена. Условие, подсказки и доступный разбор можно читать уже сейчас.</div>
     <TaskReading key={task.id} task={task} topic={topic} />
   </div>;

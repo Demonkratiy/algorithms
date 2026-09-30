@@ -101,7 +101,12 @@ describe('course catalog and migration', () => {
       .map((path) => relative(content, path).replaceAll('\\', '/'))
       .filter((path) => /^0[1-8]-/.test(path));
     expect(topics.map((topic) => topic.theoryPath).sort()).toEqual(theoryPaths.sort());
-    expect(tasks.filter((task) => task.runnable).map((task) => task.id)).toEqual(['range-sum-query']);
+    expect(tasks.filter((task) => task.runnable).map((task) => task.id)).toEqual([
+      'valid-palindrome', 'move-zeroes', 'merge-sorted-arrays',
+      'min-subarray-sum', 'max-vowels', 'longest-substring',
+      'first-unique-char', 'valid-anagram', 'group-anagrams', 'top-k-frequent',
+      'range-sum-query', 'subarray-sum-k', 'pivot-index', 'product-except-self', 'subarray-sums-divisible-by-k',
+    ]);
   });
 
   it('keeps all migrated relative Markdown links valid', () => {

@@ -39,4 +39,15 @@ describe('complexity self-assessment', () => {
   it('does not treat an obsolete stored option as a valid answer', () => {
     expect(compareComplexity(definition, { ...choices, 'build-time': 'obsolete' })[0].outcome).toBe('unanswered');
   });
+  it('accepts explicitly documented alternative goals', () => {
+    const alternative = {
+      ...definition,
+      criteria: definition.criteria.map((criterion, index) => index === 0
+        ? { ...criterion, accepted: ['constant'] } : criterion),
+    };
+    const selected = { ...choices, 'build-time': 'constant' };
+    expect(compareComplexity(alternative, selected)[0]).toMatchObject({
+      expected: 'O(N) или O(1)', outcome: 'match',
+    });
+  });
 });

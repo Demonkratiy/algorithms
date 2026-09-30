@@ -38,7 +38,8 @@
     }
     if (event.data.type !== 'run' || started || disposed) return
     started = true
-    if (typeof event.data.code !== 'string' || !Array.isArray(event.data.cases)) {
+    if (typeof event.data.code !== 'string' || !event.data.runner
+      || !Array.isArray(event.data.runner.cases)) {
       fail('RunnerProtocolError', 'Некорректный запрос на выполнение.')
       return
     }
@@ -58,7 +59,7 @@
         error.preventDefault()
         fail('WorkerError', error.message || 'Ошибка запуска Worker.')
       }
-      worker.postMessage({ code: event.data.code, cases: event.data.cases })
+      worker.postMessage({ code: event.data.code, runner: event.data.runner })
     } catch (error) {
       fail(error instanceof Error ? error.name : 'RunnerSetupError',
         error instanceof Error ? error.message : 'Не удалось запустить Worker.')

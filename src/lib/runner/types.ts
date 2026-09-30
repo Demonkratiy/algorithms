@@ -6,6 +6,7 @@ export interface CaseResult {
   passed: boolean
   logs: string[]
   error?: RunError
+  feedback?: string
 }
 
 export interface RunError {

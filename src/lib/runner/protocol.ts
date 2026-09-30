@@ -19,6 +19,7 @@ function validCase(value: unknown): value is CaseResult {
   return record(value) && text(value.name, 200) && text(value.input)
     && text(value.expected) && text(value.actual) && typeof value.passed === 'boolean'
     && validLogs(value.logs)
+    && (value.feedback === undefined || text(value.feedback))
     && (value.error === undefined || (!value.passed && validError(value.error)))
 }
 

@@ -51,7 +51,7 @@ export function ComplexityFeedback({ definition, choices, code, snapshot }: {
           <strong>{item.title}</strong>
           <div>Твой выбор: {item.selected}.</div>
           {item.outcome !== 'unanswered' && <>
-            <div>Цель задачи: {item.expected}. {item.outcome === 'match' ? 'Оценки совпадают.' : 'Оценки отличаются.'}</div>
+            <div>Цель задачи: {item.expected}. {item.outcome === 'match' ? (item.accepted?.length ? 'Выбран допустимый вариант.' : 'Оценки совпадают.') : 'Оценки отличаются.'}</div>
             <p className="small muted">{item.outcome === 'different' && 'Если твой код действительно имеет выбранную сложность, сравни его с требованием задачи. '}{item.explanation}</p>
           </>}
         </li>)}</ul>

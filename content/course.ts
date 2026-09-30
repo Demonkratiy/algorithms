@@ -1,3 +1,5 @@
+import { getTaskDefinition } from '../tasks';
+
 export type CourseTask = {
   id: string;
   title: string;
@@ -14,8 +16,8 @@ export type Topic = {
 };
 
 // IDs are persisted in browser progress. Keep them when renaming/reordering files.
-function task(id: string, title: string, path: string, runnable = false): CourseTask {
-  return { id, title, path, runnable };
+function task(id: string, title: string, path: string): CourseTask {
+  return { id, title, path, runnable: getTaskDefinition(id) !== undefined };
 }
 
 export const topics: Topic[] = [
@@ -59,7 +61,7 @@ export const topics: Topic[] = [
     id: 'prefix-sum', title: 'Prefix Sum (префиксные суммы)', section: '02. Массивы и строки',
     theoryPath: '02-arrays-strings/04-prefix-sum.md',
     tasks: [
-      task('range-sum-query', 'Range Sum Query — Immutable', 'practice/02-arrays-strings/04-prefix-sum/01-range-sum-query.md', true),
+      task('range-sum-query', 'Range Sum Query — Immutable', 'practice/02-arrays-strings/04-prefix-sum/01-range-sum-query.md'),
       task('subarray-sum-k', 'Subarray Sum Equals K', 'practice/02-arrays-strings/04-prefix-sum/02-subarray-sum-k.md'),
       task('pivot-index', 'Find Pivot Index', 'practice/02-arrays-strings/04-prefix-sum/03-pivot-index.md'),
       task('product-except-self', 'Product of Array Except Self', 'practice/02-arrays-strings/04-prefix-sum/04-product-except-self.md'),

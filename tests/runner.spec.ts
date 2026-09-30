@@ -16,7 +16,7 @@ class NumArray {
 async function run(page: Page, code: string): Promise<RunResult> {
   return page.evaluate(async (code) => {
     const runner = await import(/* @vite-ignore */ new URL('src/lib/runner/index.ts', document.baseURI).href)
-    return runner.runTask(code)
+    return runner.runTask('range-sum-query', code)
   }, code)
 }
 
@@ -152,7 +152,7 @@ test('cancellation cleans up and immediate restart works', async ({ page }) => {
   const result = await page.evaluate(async () => {
     const { runTask } = await import(/* @vite-ignore */ new URL('src/lib/runner/index.ts', document.baseURI).href)
     const controller = new AbortController()
-    const pending = runTask('while (true) {}', controller.signal)
+    const pending = runTask('range-sum-query', 'while (true) {}', controller.signal)
     setTimeout(() => controller.abort(), 100)
     return pending
   })
@@ -162,7 +162,7 @@ test('cancellation cleans up and immediate restart works', async ({ page }) => {
     const { runTask } = await import(/* @vite-ignore */ new URL('src/lib/runner/index.ts', document.baseURI).href)
     const controller = new AbortController()
     controller.abort()
-    return runTask('while (true) {}', controller.signal)
+    return runTask('range-sum-query', 'while (true) {}', controller.signal)
   })
   expect(alreadyCancelled.status).toBe('cancelled')
 })
@@ -197,7 +197,7 @@ test('sandbox has opaque origin, no parent storage, and no network access', asyn
 test('ignores forged messages from wrong source or non-opaque origin', async ({ page }) => {
   const result = await page.evaluate(async () => {
     const { runTask } = await import(/* @vite-ignore */ new URL('src/lib/runner/index.ts', document.baseURI).href)
-    const pending = runTask('while (true) {}')
+    const pending = runTask('range-sum-query', 'while (true) {}')
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[data-runner]')!
     const token = JSON.parse(iframe.srcdoc.match(/const CONFIG = (.*);\n/)![1]).token
     const data = {
@@ -223,7 +223,7 @@ test('missing bootstrap reports setup error, not a pass', async ({ page }) => {
       original.apply(this, nodes)
     }
     try {
-      return await runTask('class NumArray {}')
+      return await runTask('range-sum-query', 'class NumArray {}')
     } finally {
       document.body.append = original
     }

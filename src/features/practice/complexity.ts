@@ -9,14 +9,18 @@ export type ComplexitySnapshot = {
 export function compareComplexity(definition: ComplexityDefinition, choices: ComplexityChoices) {
   return definition.criteria.map(criterion => {
     const selected = definition.options.find(option => option.id === choices[criterion.id]);
-    const expected = definition.options.find(option => option.id === criterion.expected);
-    if (!expected) throw new Error(`Нет целевого варианта сложности для ${criterion.id}.`);
+    const accepted = [criterion.expected, ...(criterion.accepted ?? [])];
+    const expected = accepted.map(id => {
+      const option = definition.options.find(item => item.id === id);
+      if (!option) throw new Error(`Нет целевого варианта сложности для ${criterion.id}: ${id}.`);
+      return option.label;
+    });
     return {
       ...criterion,
       selected: selected?.label ?? 'Не выбрано',
-      expected: expected.label,
+      expected: expected.join(' или '),
       outcome: !selected || selected.id === 'unknown' ? 'unanswered'
-        : selected.id === criterion.expected ? 'match' : 'different',
+        : accepted.includes(selected.id) ? 'match' : 'different',
     } as const;
   });
 }

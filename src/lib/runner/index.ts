@@ -1,4 +1,4 @@
-import { getRangeSumCases } from '../../../tasks/range-sum-query/cases'
+import { getTaskDefinition } from '../../../tasks'
 import frameSource from './sandbox-frame.js?raw'
 import workerSource from './sandbox-worker.js?raw'
 import { isEnvelope, isRunResult, MAX_CODE_BYTES, RUN_TIMEOUT_MS, SETUP_TIMEOUT_MS } from './protocol'
@@ -6,7 +6,7 @@ import type { RunError, RunResult } from './types'
 
 export type { CaseResult, RunError, RunResult } from './types'
 
-export function runTask(code: string, signal?: AbortSignal): Promise<RunResult> {
+export function runTask(taskId: string, code: string, signal?: AbortSignal): Promise<RunResult> {
   const startedAt = performance.now()
   return new Promise((resolve) => {
     let iframe: HTMLIFrameElement | undefined
@@ -14,7 +14,7 @@ export function runTask(code: string, signal?: AbortSignal): Promise<RunResult> 
     let settled = false
     let ready = false
     let token = ''
-    const cases = getRangeSumCases()
+    const runner = getTaskDefinition(taskId)?.runner
 
     function finish(status: RunResult['status'], error?: RunError, result?: RunResult) {
       if (settled) return
@@ -48,9 +48,9 @@ export function runTask(code: string, signal?: AbortSignal): Promise<RunResult> 
         timer = setTimeout(() => finish('timeout', {
           name: 'TimeoutError', message: `Выполнение превысило ${RUN_TIMEOUT_MS} мс.`,
         }), RUN_TIMEOUT_MS + 100)
-        iframe.contentWindow?.postMessage({ type: 'run', token, code, cases }, '*')
+        iframe.contentWindow?.postMessage({ type: 'run', token, code, runner }, '*')
       } else if (event.data.type === 'result' && ready) {
-        if (!isRunResult(event.data.result, cases.length)) {
+        if (!isRunResult(event.data.result, runner?.cases.length ?? 0)) {
           finish('error', { name: 'RunnerProtocolError', message: 'Некорректный ответ среды выполнения.' })
           return
         }
@@ -60,6 +60,10 @@ export function runTask(code: string, signal?: AbortSignal): Promise<RunResult> 
 
     if (signal?.aborted) {
       cancel()
+      return
+    }
+    if (!runner) {
+      finish('error', { name: 'TaskNotFoundError', message: `Проверка задачи «${taskId}» не подключена.` })
       return
     }
     if (typeof code !== 'string') {

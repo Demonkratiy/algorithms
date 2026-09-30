@@ -1,5 +1,6 @@
 import starter from './starter.js?raw'
-import type { ComplexityDefinition } from '../types'
+import type { ComplexityDefinition, TaskDefinition } from '../types'
+import { getRangeSumCases } from './cases'
 
 const complexity = {
   variables: 'N — число элементов исходного массива. Память — дополнительная, без учёта входного массива.',
@@ -35,9 +36,21 @@ const complexity = {
   ],
 } satisfies ComplexityDefinition
 
-export const rangeSumTask = {
+export const rangeSumTask: TaskDefinition = {
   id: 'range-sum-query',
   title: 'Range Sum Query — Immutable',
   starter,
   complexity,
-} as const
+  runner: {
+    kind: 'class',
+    entryPoint: 'NumArray',
+    cases: getRangeSumCases().map(test => ({
+      name: test.name,
+      instances: test.instances.map(nums => [nums]),
+      calls: test.calls.map(call => ({
+        instance: call.instance, method: 'sumRange',
+        args: [call.left, call.right], expected: call.expected,
+      })),
+    })),
+  },
+}

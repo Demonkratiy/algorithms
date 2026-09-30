@@ -11,7 +11,10 @@
   const apply = Reflect.apply
   const arrayPush = Array.prototype.push
   const arrayJoin = Array.prototype.join
-  const arraySlice = Array.prototype.slice
+  const arraySort = Array.prototype.sort
+  const keysOf = Object.keys
+  const clone = structuredClone
+  const finite = Number.isFinite
   const push = (array, item) => apply(arrayPush, array, [item])
   const join = (array, separator) => apply(arrayJoin, array, [separator])
   const logs = []
@@ -20,10 +23,65 @@
   let logsTruncated = false
   let currentCase
 
-  function describeInput(nums) {
-    if (nums.length <= 20) return stringify(nums)
-    const preview = stringify(apply(arraySlice, nums, [0, 10]))
-    return `${slice(preview, 0, -1)}, …] /* length: ${nums.length} */`
+  function display(value, depth = 0) {
+    if (typeof value === 'string') return stringify(slice(value, 0, 1000)) + (value.length > 1000 ? '…' : '')
+    if (!isArray(value)) return format(value)
+    if (depth > 3) return '[Array]'
+    const parts = []
+    for (let i = 0; i < Math.min(value.length, 20); i++) push(parts, display(value[i], depth + 1))
+    return slice(`[${join(parts, ', ')}${value.length > 20 ? `, …] /* length: ${value.length} */` : ']'}`, 0, 4000)
+  }
+
+  function equal(actual, expected) {
+    if (actual === expected) return true
+    if (actual === null || expected === null || typeof actual !== 'object' || typeof expected !== 'object') return false
+    if (isArray(actual) !== isArray(expected)) return false
+    if (isArray(expected)) {
+      if (actual.length !== expected.length) return false
+      for (let i = 0; i < expected.length; i++) if (!equal(actual[i], expected[i])) return false
+      return true
+    }
+    const keys = keysOf(expected)
+    if (keysOf(actual).length !== keys.length) return false
+    for (const key of keys) if (!descriptor(actual, key) || !equal(actual[key], expected[key])) return false
+    return true
+  }
+
+  function primitiveKey(value) {
+    if (value === null) return 'null'
+    if (typeof value === 'number' && finite(value)) return `number:${value}`
+    if (typeof value === 'string' || typeof value === 'boolean') return `${typeof value}:${string(value)}`
+    return undefined
+  }
+
+  function unorderedKeys(values, nested) {
+    const normalized = []
+    for (const value of values) {
+      let key
+      if (nested) {
+        if (!isArray(value)) return undefined
+        const members = unorderedKeys(value, false)
+        if (!members) return undefined
+        key = stringify(members)
+      } else {
+        key = primitiveKey(value)
+        if (key === undefined) return undefined
+      }
+      push(normalized, key)
+    }
+    return apply(arraySort, normalized, [])
+  }
+
+  function matches(actual, expected, comparison) {
+    if (comparison === 'exact') return equal(actual, expected)
+    if (!isArray(actual) || !isArray(expected) || actual.length !== expected.length) return false
+    const left = unorderedKeys(actual, comparison === 'nested-unordered')
+    const right = unorderedKeys(expected, comparison === 'nested-unordered')
+    return left !== undefined && right !== undefined && equal(left, right)
+  }
+
+  function describeArgs(args) {
+    return join(args.map(value => display(value)), ', ')
   }
 
   function format(value, depth = 0, seen = new Set()) {
@@ -106,29 +164,49 @@
     const startedAt = now()
     const results = []
     try {
-      const NumArray = new FunctionConstructor(`${data.code}\n; return typeof NumArray === "function" ? NumArray : undefined;\n`)()
-      if (typeof NumArray !== 'function') throw new TypeError('Определи класс NumArray с constructor(nums) и sumRange(left, right).')
-      for (const test of data.cases) {
+      const runner = data.runner
+      const Entry = new FunctionConstructor(`${data.code}\n; return typeof ${runner.entryPoint} === "function" ? ${runner.entryPoint} : undefined;\n`)()
+      if (typeof Entry !== 'function') throw new TypeError(`Определи ${runner.kind === 'class' ? 'класс' : 'функцию'} ${runner.entryPoint} из стартового шаблона.`)
+      for (const test of runner.cases) {
+        const input = runner.kind === 'function'
+          ? `${runner.entryPoint}(${describeArgs(test.args)})`
+          : join(test.instances.map((args, i) => `a${i} = new ${runner.entryPoint}(${describeArgs(args)})`), '; ')
+            + '; ' + join(test.calls.map(call => `a${call.instance}.${call.method}(${describeArgs(call.args)})`), '; ')
         currentCase = {
           name: test.name,
-          input: slice(join(test.instances.map((nums, i) => `a${i} = new NumArray(${describeInput(nums)})`), '; ')
-            + '; ' + join(test.calls.map((call) => `a${call.instance}.sumRange(${call.left}, ${call.right})`), '; '), 0, 4000),
-          expected: `[${join(test.calls.map((call) => string(call.expected)), ', ')}]`,
+          input: slice(input, 0, 4000),
+          expected: display(runner.kind === 'function' ? test.expected : test.calls.map(call => call.expected)),
           actual: 'Выполнение теста не завершено.',
           passed: false,
           logs: [],
         }
         push(results, currentCase)
-        const instances = test.instances.map((nums) => new NumArray([...nums]))
-        const actual = []
-        let passed = true
-        for (const call of test.calls) {
-          const value = instances[call.instance].sumRange(call.left, call.right)
-          push(actual, format(value))
-          if (typeof value !== 'number' || value !== call.expected) passed = false
+        if (runner.kind === 'function') {
+          const args = clone(test.args)
+          const returned = apply(Entry, undefined, args)
+          const actual = runner.output.kind === 'argument' ? args[runner.output.index] : returned
+          currentCase.actual = display(actual)
+          currentCase.passed = matches(actual, test.expected, runner.comparison)
+          if (runner.preserveArgs?.some(index => !equal(args[index], test.args[index]))) {
+            currentCase.passed = false
+            currentCase.feedback = 'Изменён входной аргумент, который по условию должен оставаться неизменным.'
+          }
+          if (runner.freshArray && (!isArray(returned) || args.some(arg => arg === returned))) {
+            currentCase.passed = false
+            currentCase.feedback = 'По условию нужно вернуть новый массив, а не ссылку на входной.'
+          }
+        } else {
+          const instances = test.instances.map(args => new Entry(...clone(args)))
+          const actual = []
+          let passed = true
+          for (const call of test.calls) {
+            const value = apply(instances[call.instance][call.method], instances[call.instance], clone(call.args))
+            push(actual, value)
+            if (!equal(value, call.expected)) passed = false
+          }
+          currentCase.actual = display(actual)
+          currentCase.passed = passed
         }
-        currentCase.actual = slice(`[${join(actual, ', ')}]`, 0, 4000)
-        currentCase.passed = passed
         currentCase = undefined
       }
       post({ type: 'result', result: {
