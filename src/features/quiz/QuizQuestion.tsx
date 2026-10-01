@@ -31,7 +31,7 @@ export function QuizQuestion({
     </label>
     <p className="muted small">Объяснение сохраняется для самопроверки, но автоматически не оценивается.</p>
     {checkedAnswer && <div className="quiz-explanation" role="region" aria-label={`Разбор сниппета ${question.id.replace('snippet-', '')}`}>
-      <p className={checkedAnswer === question.answerId ? 'success-text' : 'error-text'}>
+      <p className={`result-status ${checkedAnswer === question.answerId ? 'result-status--passed' : 'result-status--failed'}`}>
         {checkedAnswer === question.answerId ? 'Верно.' : 'Ответ не совпал.'}
       </p>
       <p><strong>Правильный вариант:</strong> {answerOption?.label}</p>

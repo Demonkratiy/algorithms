@@ -4,6 +4,7 @@ import { CoursePage, NotFound, ReadPage, SectionPage, TopicPage, WelcomePage } f
 import { PracticePage } from '../pages/Practice';
 import { SettingsPage } from '../pages/Settings';
 import { PreferencesProvider, usePreferences } from './preferences';
+import { ConfirmationProvider } from './confirmation';
 import { CourseSidebar } from '../components/CourseSidebar';
 import { SidebarResizer, useSidebarWidth } from '../components/SidebarResizer';
 import { findCourseLocation, getTaskNumber } from '../lib/content/navigation';
@@ -60,5 +61,5 @@ function Shell() {
   </div>;
 }
 export default function App() {
-  return <ErrorBoundary><HashRouter><PreferencesProvider><Shell /></PreferencesProvider></HashRouter></ErrorBoundary>;
+  return <ErrorBoundary><HashRouter><PreferencesProvider><ConfirmationProvider><Shell /></ConfirmationProvider></PreferencesProvider></HashRouter></ErrorBoundary>;
 }

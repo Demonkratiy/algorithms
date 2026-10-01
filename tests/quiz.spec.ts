@@ -61,10 +61,10 @@ async function download(page: Page): Promise<{ backup: Backup; source: string }>
 }
 async function importData(page: Page, source: string) {
   await page.goto('/#/settings');
-  page.once('dialog', dialog => dialog.accept());
   await page.locator('input[type="file"]').setInputFiles({
     name: 'quiz.json', mimeType: 'application/json', buffer: Buffer.from(source),
   });
+  await page.getByRole('dialog').getByRole('button', { name: 'Импортировать', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Импортировано записей: 1');
 }
 
@@ -81,6 +81,7 @@ for (const definition of [outputOrderQuiz, asyncTrapsQuiz]) {
     await expect(page.locator('.monaco-editor')).toHaveCount(0);
     await check(page);
     await expect(result(page)).toContainText('Попытка не завершена');
+    await expect(result(page).locator('.result-status--passed, .result-status--failed')).toHaveCount(0);
     await expect(result(page)).toContainText('Заполнено: 0 из 6');
     await expect(explanations(page)).toHaveCount(0);
     await choose(page, definition, 0, false);
@@ -89,6 +90,8 @@ for (const definition of [outputOrderQuiz, asyncTrapsQuiz]) {
     await expect(result(page)).toContainText('Верно: 0 из 6');
     await expect(explanations(page)).toHaveCount(1);
     await expect(explanations(page)).toContainText('Ответ не совпал');
+    await expect(explanations(page).locator('.result-status--failed')).toHaveCount(1);
+    await expect(result(page).locator('.result-status--failed')).toHaveCount(1);
     await expect(question(page, 'snippet-2').locator('.quiz-explanation')).toHaveCount(0);
     await expect(page.getByText(/Ранее задача была отмечена решённой/)).toHaveCount(0);
     expect(forbiddenRequests).toEqual([]);
@@ -103,11 +106,14 @@ test('correct choices pass, notes are ungraded; editing choices or notes invalid
   await expect(explanations(page)).toHaveCount(0);
   await check(page);
   await expect(result(page)).toContainText('Все ответы верны');
+  await expect(result(page).locator('.result-status--passed')).toHaveCount(1);
+  await expect(explanations(page).locator('.result-status--passed')).toHaveCount(6);
   await expect(result(page)).toContainText('Объяснения не оценивались');
   await expect(explanations(page)).toHaveCount(6);
   await expect(page.getByText(/Ранее задача была отмечена решённой/)).toBeVisible();
   await notes.fill('Теперь проверю вручную.');
   await expect(result(page)).toContainText('Проверка устарела');
+  await expect(result(page).locator('.result-status--passed, .result-status--failed')).toHaveCount(0);
   await expect(explanations(page)).toHaveCount(0);
   await check(page);
   await choose(page, outputOrderQuiz, 0, false);
@@ -168,11 +174,11 @@ test('restore needs confirmation, retains legacy text and keeps only five non-de
   await choose(page, outputOrderQuiz, 0, false);
   await question(page, 'snippet-1').getByRole('textbox').fill('Второе объяснение');
   await check(page);
-  page.once('dialog', dialog => dialog.dismiss());
   await page.getByRole('button', { name: 'Восстановить попытку 2', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Отмена', exact: true }).click();
   await expect(question(page, 'snippet-1').getByRole('textbox')).toHaveValue('Второе объяснение');
-  page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: 'Восстановить попытку 2', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Восстановить ответы', exact: true }).click();
   await expect(question(page, 'snippet-1').getByRole('textbox')).toHaveValue('Первое объяснение');
   await expect(explanations(page)).toHaveCount(0);
   await expect(result(page)).toHaveCount(0);

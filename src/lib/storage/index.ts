@@ -1,9 +1,18 @@
 import { openDB, type DBSchema } from 'idb';
 import type { ComplexityChoices } from '../../../tasks/types';
 import type { QuizAnswers } from '../../../tasks/quiz-types';
+import { isPalette, type Palette } from '../palettes';
+import { isEditorFont, isTextSize, isUiFont, type EditorFont, type TextSize, type UiFont } from '../typography';
 
 export type Theme = 'light' | 'dark' | 'system';
-export type Settings = { ui: Theme; editor: Theme };
+export type Settings = {
+  ui: Theme; editor: Theme; palette: Palette;
+  uiSize: TextSize; editorSize: TextSize; uiFont: UiFont; editorFont: EditorFont;
+};
+export const defaultSettings: Settings = {
+  ui: 'system', editor: 'dark', palette: 'lavender',
+  uiSize: 'medium', editorSize: 'medium', uiFont: 'system', editorFont: 'default',
+};
 export type Attempt = {
   at: string;
   code: string;
@@ -137,12 +146,21 @@ export function parseBackup(source: string): Backup {
 const isTheme = (value: unknown): value is Theme => ['light', 'dark', 'system'].includes(String(value));
 export function readSettings(): Settings {
   const source = localStorage.getItem('algo-settings');
-  if (source === null) return { ui: 'system', editor: 'dark' };
+  if (source === null) return { ...defaultSettings };
   const value: unknown = JSON.parse(source);
   if (!object(value) || !isTheme(value.ui) || !isTheme(value.editor)) {
-    throw new Error('Сохранённые настройки повреждены. Выберите темы заново.');
+    throw new Error('Сохранённые настройки повреждены. Выберите оформление заново или сбросьте его.');
   }
-  return { ui: value.ui, editor: value.editor };
+  const palette = 'palette' in value ? value.palette : defaultSettings.palette;
+  if (!isPalette(palette)) throw new Error('Сохранённая палитра неизвестна. Выберите палитру заново или сбросьте оформление.');
+  const uiSize = 'uiSize' in value ? value.uiSize : defaultSettings.uiSize;
+  const editorSize = 'editorSize' in value ? value.editorSize : defaultSettings.editorSize;
+  const uiFont = 'uiFont' in value ? value.uiFont : defaultSettings.uiFont;
+  const editorFont = 'editorFont' in value ? value.editorFont : defaultSettings.editorFont;
+  if (!isTextSize(uiSize) || !isTextSize(editorSize) || !isUiFont(uiFont) || !isEditorFont(editorFont)) {
+    throw new Error('Сохранённые настройки шрифтов повреждены. Сбросьте оформление.');
+  }
+  return { ui: value.ui, editor: value.editor, palette, uiSize, editorSize, uiFont, editorFont };
 }
 export function writeSettings(settings: Settings) {
   localStorage.setItem('algo-settings', JSON.stringify(settings));

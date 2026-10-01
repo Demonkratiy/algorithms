@@ -14,11 +14,11 @@ async function seed(page: Page, overrides: Partial<TaskRecord> = {}, version = 2
     solved: false, attempts: [], timeComplexity: '', spaceComplexity: '', ...overrides,
   };
   await page.goto('/#/settings');
-  page.once('dialog', dialog => dialog.accept());
   await page.locator('input[type="file"]').setInputFiles({
     name: 'assessment.json', mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify({ version, tasks: [record] })),
   });
+  await page.getByRole('dialog').getByRole('button', { name: 'Импортировать', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Импортировано записей: 1');
   await page.goto('/#/task/range-sum-query');
   await expect(page.getByText('Сохранено в браузере', { exact: true })).toBeVisible();
@@ -116,10 +116,10 @@ test('choices survive reload and an export/import round trip', async ({ page }) 
   expect(backup.tasks[0].complexityChoices).toEqual({ 'build-time': 'linear', 'query-space': 'unknown' });
   await seed(page);
   await page.goto('/#/settings');
-  page.once('dialog', dialog => dialog.accept());
   await page.locator('input[type="file"]').setInputFiles({
     name: 'restored.json', mimeType: 'application/json', buffer: Buffer.from(source),
   });
+  await page.getByRole('dialog').getByRole('button', { name: 'Импортировать', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Импортировано записей: 1');
   await page.goto('/#/task/range-sum-query');
   await openAssessment(page);

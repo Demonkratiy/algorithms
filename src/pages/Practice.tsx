@@ -15,6 +15,7 @@ import { NotFound } from './Learning';
 import { QuizPage } from './Quiz';
 import { getTaskNumber } from '../lib/content/navigation';
 import { TaskPriorityBadge } from '../components/TaskPriorityBadge';
+import { useConfirmation } from '../app/confirmation';
 
 const CodeEditor = lazy(() => import('../features/practice/CodeEditor'));
 const statusNames: Record<RunResult['status'], string> = {
@@ -65,6 +66,7 @@ function TaskReading({ task, topic }: { task: CourseTask; topic: Topic }) {
 }
 
 function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic; definition: TaskDefinition }) {
+  const confirm = useConfirmation();
   const { record, ready, update, error: storageError, saving } = useTaskRecord(task.id, definition.starter);
   const [result, setResult] = useState<RunResult | null>(null);
   const [resultCode, setResultCode] = useState('');
@@ -86,7 +88,7 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
         setError('В прежней общей задаче пока нет сохранённого кода.');
         return;
       }
-      if (!confirm('Заменить код этой задачи кодом из прежней общей задачи? История источника останется без изменений.')) return;
+      if (!await confirm({ title: 'Взять прежний код?', message: 'Заменить код этой задачи кодом из прежней общей задачи? История источника останется без изменений.', confirmLabel: 'Заменить код' })) return;
       update(current => ({ ...current, code: previous.code }));
       setResult(null); setComplexitySnapshot(null);
       setCopyNotice('Код скопирован. Эта часть проверяется отдельно; история прежних запусков осталась в исходной задаче.');
@@ -154,8 +156,8 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
               legacyTime={record.timeComplexity} legacySpace={record.spaceComplexity} />
           </div>
           <div className="editor-actions">
-            <button className="button" disabled={!ready || running} onClick={() => {
-              if (confirm('Заменить текущий код стартовым шаблоном? Последние запуски останутся в истории.')) {
+            <button className="button" disabled={!ready || running} onClick={async () => {
+              if (await confirm({ title: 'Сбросить решение?', message: 'Заменить текущий код стартовым шаблоном? Последние запуски останутся в истории.', confirmLabel: 'Сбросить код' })) {
                 update(p => ({ ...p, code: definition.starter })); setResult(null);
               }
             }}>Сбросить</button>
@@ -167,7 +169,7 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
         </section>}
       results={<section className="results" aria-label="Результаты проверки" aria-live="polite">
           {running ? <p role="status">Проверяем решение на полном наборе тестов…</p> : !result ? <p className="muted">Нажми «Проверить решение», чтобы запустить все тесты. Результаты и вывод консоли появятся у каждого теста.</p> : <>
-            <div className="result-heading"><strong className={result.status === 'passed' ? 'success-text' : 'error-text'}>{statusNames[result.status]}</strong><span className="muted small">{Math.round(result.durationMs)} мс · не оценка Big O</span></div>
+            <div className={`result-heading result-status ${result.status === 'passed' ? 'result-status--passed' : result.status === 'failed' || result.status === 'error' ? 'result-status--failed' : ''}`}><strong>{statusNames[result.status]}</strong><span className="muted small">{Math.round(result.durationMs)} мс · не оценка Big O</span></div>
             {record.code !== resultCode && <p className="notice small">Код изменён после запуска. Результаты относятся к предыдущей версии.</p>}
             {explain(result) && <p>{explain(result)}</p>}
             {result.error && <pre className="error">{result.error.name}: {result.error.message}{result.error.line ? `\nСтрока ${result.error.line}${result.error.column ? `:${result.error.column}` : ''}` : ''}</pre>}
@@ -175,7 +177,8 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
             {(result.status === 'timeout' || result.status === 'cancelled') && <p className="small muted">Запуск прерван до получения отчёта. Вывод консоли этого запуска недоступен.</p>}
             {result.logsTruncated && <p className="notice small">Вывод консоли ограничен для всего запуска: до 100 сообщений, 1 000 символов в сообщении и 20 000 суммарно. Часть вывода сокращена или пропущена.</p>}
             {result.logs.length > 0 && <details className="initialization-logs"><summary>Консоль до запуска тестов ({result.logs.length})</summary><pre>{result.logs.join('\n')}</pre></details>}
-            <div className="case-list">{result.cases.map((test, index) => <details key={index} open={!test.passed}>
+            <div className="case-list">{result.cases.map((test, index) => <details key={index} open={!test.passed}
+              className={`result-status ${test.passed ? 'result-status--passed' : 'result-status--failed'}`}>
               <summary><span className={test.passed ? 'success-text' : 'error-text'}>{test.passed ? '✓' : '×'}</span> {test.name}</summary>
               <p className="small">Вход</p><pre>{test.input}</pre>
               <div className="comparison"><div><span>Ожидается</span><pre>{test.expected}</pre></div><div><span>Получено</span><pre>{test.actual}</pre></div></div>
@@ -193,8 +196,8 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
           <p className="small muted">Сохраняются снимки кода последних пяти запусков.</p>
           {record.attempts.map((attempt, i) => <div className="attempt" key={`${attempt.at}-${i}`}>
             <span>{new Date(attempt.at).toLocaleString('ru')} · {attempt.mode === 'check' ? 'Проверка' : 'Примеры (старый запуск)'} · {statusNames[attempt.status]}</span>
-            <button className="button small" disabled={running} onClick={() => {
-              if (confirm('Заменить текущий код этой версией?')) { update(p => ({ ...p, code: attempt.code })); setResult(null); }
+            <button className="button small" disabled={running} onClick={async () => {
+              if (await confirm({ title: 'Восстановить код?', message: 'Заменить текущий код этой версией? История запусков останется без изменений.', confirmLabel: 'Восстановить код' })) { update(p => ({ ...p, code: attempt.code })); setResult(null); }
             }}>Восстановить код</button>
           </div>)}
         </details>

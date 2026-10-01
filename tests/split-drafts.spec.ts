@@ -23,21 +23,21 @@ test('splitting a task preserves old code/history and copies code only with conf
     timeComplexity: 'O(N)', spaceComplexity: 'O(1)', complexityChoices: { time: 'linear', space: 'constant' },
   };
   await page.goto('/#/settings');
-  page.once('dialog', dialog => dialog.accept());
   await page.locator('input[type="file"]').setInputFiles({
     name: 'legacy.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({ version: 2, tasks: [source] })),
   });
+  await page.getByRole('dialog').getByRole('button', { name: 'Импортировать', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Импортировано записей: 1');
   await page.goto('/#/task/linked-list-cycle-entry');
   await expect(page.getByText('Сохранено в браузере', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'общую задачу', exact: true })).toHaveAttribute('href', '#/task/linked-list-cycle');
   const before = await stored(page, 'linked-list-cycle-entry');
-  page.once('dialog', dialog => dialog.dismiss());
   await page.getByRole('button', { name: 'Взять прежний код', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Отмена', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Взять прежний код', exact: true })).toBeEnabled();
   expect(await stored(page, 'linked-list-cycle-entry')).toEqual(before);
-  page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: 'Взять прежний код', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Заменить код', exact: true }).click();
   await expect(page.getByText('Код скопирован.', { exact: false })).toBeVisible();
   await expect(page.getByText('Сохранено в браузере', { exact: true })).toBeVisible();
   expect(await stored(page, 'linked-list-cycle')).toEqual(source);

@@ -1,0 +1,17 @@
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/source-sans-3";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/source-code-pro";
+@import "@fontsource-variable/roboto";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/noto-serif";
+@import "@fontsource/comic-relief/400.css";
+@import "@fontsource/comic-relief/700.css";
+
+:root {
+  --ui-font-family: "Segoe UI", system-ui, sans-serif;
+  --code-font-family: Consolas, "Courier New", monospace;
+  --editor-font-size: 14px;
+}
+:root[data-ui-size="small"] { font-size: 81.25%; }
+:root[data-ui-size="large"] { font-size: 100%; }

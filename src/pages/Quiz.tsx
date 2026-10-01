@@ -10,6 +10,7 @@ import { assessQuiz, isQuizSnapshotCurrent, quizSnapshot, type QuizSnapshot } fr
 import type { Attempt } from '../lib/storage';
 import { getTaskNumber } from '../lib/content/navigation';
 import { TaskPriorityBadge } from '../components/TaskPriorityBadge';
+import { useConfirmation } from '../app/confirmation';
 import '../features/quiz/quiz.css';
 
 export function QuizPage(props: { task: CourseTask; topic: Topic; definition: QuizDefinition }) {
@@ -17,6 +18,7 @@ export function QuizPage(props: { task: CourseTask; topic: Topic; definition: Qu
 }
 
 function QuizWorkspace({ task, topic, definition }: { task: CourseTask; topic: Topic; definition: QuizDefinition }) {
+  const confirm = useConfirmation();
   const { text, loading, error: contentError } = useMarkdown(task.path);
   const { record, ready, update, error: storageError, saving } = useTaskRecord(task.id, '');
   const [snapshot, setSnapshot] = useState<QuizSnapshot | null>(null);
@@ -48,8 +50,8 @@ function QuizWorkspace({ task, topic, definition }: { task: CourseTask; topic: T
     update(previous => ({ ...previous, solved: previous.solved || passed, attempts: [attempt, ...previous.attempts].slice(0, 5) }));
   }
 
-  function restore(attempt: Attempt) {
-    if (!attempt.quizAnswers || !confirm('Восстановить ответы и объяснения этой попытки вместо текущих? Прежние заметки и история сохранятся.')) return;
+  async function restore(attempt: Attempt) {
+    if (!attempt.quizAnswers || !await confirm({ title: 'Восстановить попытку?', message: 'Восстановить ответы и объяснения этой попытки вместо текущих? Прежние заметки и история сохранятся.', confirmLabel: 'Восстановить ответы' })) return;
     update(previous => ({
       ...previous, quizAnswers: { ...attempt.quizAnswers }, quizExplanations: { ...attempt.quizExplanations },
     }));
@@ -106,7 +108,7 @@ function QuizWorkspace({ task, topic, definition }: { task: CourseTask; topic: T
         {snapshot && assessment && <div role="region" aria-label="Результат квиза" aria-live="polite">
           {!current ? <p className="notice">Проверка устарела: ответы или объяснения изменены. Нажми «Проверить ответы» снова.</p>
             : <>
-              <p className={assessment.passed ? 'success-text' : ''}>
+              <p className={`result-status ${assessment.passed ? 'result-status--passed' : assessment.correct < assessment.answered ? 'result-status--failed' : ''}`}>
                 {assessment.passed ? 'Все ответы верны.' : assessment.answered < definition.questions.length
                   ? 'Попытка не завершена: остались вопросы без ответа.' : 'Есть ошибки: сравни рассуждение с разбором.'}
               </p>

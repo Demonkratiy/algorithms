@@ -57,6 +57,8 @@ test('one check button runs all cases, starter fails and draft survives reload',
   await expect(page.getByRole('button', { name: /Пример/ })).toHaveCount(0);
   await page.getByRole('button', { name: 'Проверить решение', exact: true }).click();
   await expect(page.locator('.case-list > details')).toHaveCount(6);
+  await expect(page.locator('.result-heading')).toHaveClass(/result-status--failed/);
+  await expect(page.locator('.case-list > details.result-status--failed').first()).toHaveCSS('border-top-width', '1px');
   await expect(page.locator('.results')).toContainText('Ответ не совпал');
   await expect(page.locator('.results')).toContainText('undefined');
   await expect(page.getByText('Есть успешная проверка', { exact: true })).toHaveCount(0);
@@ -129,10 +131,10 @@ test('valid backup restores a draft and full checks persist historical success',
     solved: false, attempts: [{ at: new Date().toISOString(), code, mode: 'example', status: 'passed' }], timeComplexity: '', spaceComplexity: '',
   }] };
   await page.goto('/#/settings');
-  page.once('dialog', dialog => dialog.accept());
   await page.locator('input[type="file"]').setInputFiles({
     name: 'progress.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)),
   });
+  await page.getByRole('dialog').getByRole('button', { name: 'Импортировать', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Импортировано записей: 1');
   await page.goto('/#/task/range-sum-query');
   await expect(page.locator('.monaco-editor')).toContainText('reduce');
@@ -141,6 +143,9 @@ test('valid backup restores a draft and full checks persist historical success',
   await expect(page.locator('.attempt')).toContainText('Примеры (старый запуск)');
   await page.getByRole('button', { name: 'Проверить решение', exact: true }).click();
   await expect(page.locator('.results')).toContainText('Тесты пройдены');
+  await expect(page.locator('.result-heading')).toHaveClass(/result-status--passed/);
+  await expect(page.locator('.case-list > details.result-status--passed')).toHaveCount(6);
+  await expect(page.locator('.case-list > details').first()).toHaveCSS('border-top-style', 'solid');
   await expect(page.getByText('Сохранено в браузере', { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByText('Есть успешная проверка', { exact: true })).toBeVisible();
