@@ -92,6 +92,11 @@ Web Worker сам по себе не обеспечивает полноценн
 чтобы быстрые правки не перезаписывали более свежий черновик старым.
 
 Маршрутизация использует hash, сборка — относительный base для статического размещения.
+GitHub Pages публикует только `dist` из `main` через `.github/workflows/pages.yml`.
+PR проходят install/unit/build/production UI smoke без публикации; push в main
+добавляет upload/deploy после успешных проверок. Deployment использует окружение
+`github-pages` и минимальные `pages: write`/`id-token: write`; actions закреплены на SHA.
+Адрес — `https://demonkratiy.github.io/algorithms/`, base `./` сохраняется.
 Markdown загружается лениво только из `content/`; raw HTML проходит sanitization.
 Личные решения не импортируются в приложение.
 
