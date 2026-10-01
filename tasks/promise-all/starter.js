@@ -1,0 +1,3 @@
+function myPromiseAll(promises) {
+  // TODO
+}

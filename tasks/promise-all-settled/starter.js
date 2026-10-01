@@ -1,0 +1,3 @@
+function myAllSettled(promises) {
+  // TODO
+}
