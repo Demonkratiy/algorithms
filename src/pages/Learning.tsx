@@ -1,6 +1,8 @@
 import { Link, useParams } from 'react-router-dom';
 import { topics, type Topic } from '../../content/course';
 import { Markdown, useMarkdown } from '../components/Markdown';
+import { courseSections, findCourseLocation, getTaskNumber } from '../lib/content/navigation';
+import { TaskPriorityBadge } from '../components/TaskPriorityBadge';
 
 export function CoursePage() {
   return <div className="content">
@@ -8,18 +10,26 @@ export function CoursePage() {
     <h1>Учимся решать, а не запоминать</h1>
     <p className="lede">Теория, осознанная практика и проверка на JavaScript. По одному паттерну за раз.</p>
     <div className="notice">Заданий с проверкой: {topics.flatMap(topic => topic.tasks).filter(task => task.runnable).length}. Практика кода и мини-тесты отмечены в разделах курса.</div>
+    <p className="small muted">Номера показывают место в теме. Сначала проходи основные задачи, дополнительные можно отложить. Доступ к заданиям свободный.</p>
     <Link className="button" to="/read/00-how-to-solve.md">Начать с UMPIRE →</Link>
-    <div className="course-grid">{topics.map((topic, index) => <Link className="card topic-card" key={topic.id} to={`/topic/${topic.id}`}>
-      <span className="eyebrow">{String(index + 1).padStart(2, '0')} / {topic.section}</span>
-      <h2>{topic.title}</h2><span className="muted">{topic.tasks.length ? `${topic.tasks.length} задач` : 'Базовые концепции'} →</span>
-    </Link>)}</div>
+    <div className="course-sections">{courseSections.map(section => <section className="course-section" key={section.id} aria-labelledby={`course-section-${section.id}`}>
+      <header className="course-section-heading">
+        <span className="course-section-number" aria-hidden="true">{section.number}</span>
+        <h2 id={`course-section-${section.id}`}>{section.title}</h2>
+      </header>
+      <div className="course-grid">{section.topics.map(({ topic, number }) => <Link className="card topic-card" key={topic.id} to={`/topic/${topic.id}`}>
+        <span className="eyebrow">Тема {number}</span>
+        <h3>{topic.title}</h3><span className="muted">{topic.tasks.length ? `Заданий: ${topic.tasks.length}` : 'Базовые концепции'} →</span>
+      </Link>)}</div>
+    </section>)}</div>
   </div>;
 }
 
 function TopicView({ topic }: { topic: Topic }) {
   const { text, error, loading } = useMarkdown(topic.theoryPath);
+  const location = findCourseLocation(`/topic/${topic.id}`);
   return <div className="content">
-    <div className="eyebrow">{topic.section}</div><h1>{topic.title}</h1>
+    <div className="eyebrow">{location ? `${location.number} · ${location.section.title}` : topic.section}</div><h1>{topic.title}</h1>
     <div className="reading-layout">
       <article className="card article">
         {loading && <p role="status">Загружаем теорию…</p>}
@@ -30,8 +40,10 @@ function TopicView({ topic }: { topic: Topic }) {
         <h2>Закрепи на практике</h2>
         <p className="muted small">Сначала своя попытка, затем подсказки и разбор.</p>
         {topic.tasks.map(task => <Link className="task-link" key={task.id} to={`/task/${task.id}`}>
-          <strong>{task.title}</strong>
-          <span className={`badge ${task.runnable ? 'green' : ''}`}>{task.activity === 'quiz' ? 'Мини-тест' : task.runnable ? 'Проверка в браузере' : 'Материал'}</span>
+          <strong><span className="task-index">{getTaskNumber(task.id)}</span> {task.title}</strong>
+          <span className="badges"><TaskPriorityBadge priority={task.priority} />
+            <span className={`badge ${task.runnable ? 'green' : ''}`}>{task.activity === 'quiz' ? 'Мини-тест' : task.runnable ? 'Проверка в браузере' : 'Материал'}</span>
+          </span>
         </Link>)}
         {!topic.tasks.length && <p className="muted">Мини-опрос находится в конце заметки.</p>}
         <Link to="/">← Все темы</Link>

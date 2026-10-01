@@ -1,4 +1,6 @@
-const markdownFiles = import.meta.glob<string>('/content/**/*.md', {
+import { practiceIndex } from '../../../content/priorities';
+
+const markdownFiles = import.meta.glob<string>(['/content/**/*.md', '!/content/practice/README.md'], {
   query: '?raw',
   import: 'default',
 });
@@ -11,6 +13,7 @@ export async function getMarkdown(path: string): Promise<string> {
   ) {
     throw new Error('Недопустимый путь Markdown: нужен относительный путь внутри content/.');
   }
+  if (path === 'practice/README.md') return practiceIndex;
   const load = markdownFiles[`/content/${path}`];
   if (!load) {
     throw new Error(`Markdown не найден в каталоге курса: ${path}`);

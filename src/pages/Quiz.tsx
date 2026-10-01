@@ -8,6 +8,8 @@ import { QuizQuestion } from '../features/quiz/QuizQuestion';
 import { parseQuizMarkdown } from '../features/quiz/content';
 import { assessQuiz, isQuizSnapshotCurrent, quizSnapshot, type QuizSnapshot } from '../features/quiz/assessment';
 import type { Attempt } from '../lib/storage';
+import { getTaskNumber } from '../lib/content/navigation';
+import { TaskPriorityBadge } from '../components/TaskPriorityBadge';
 import '../features/quiz/quiz.css';
 
 export function QuizPage(props: { task: CourseTask; topic: Topic; definition: QuizDefinition }) {
@@ -56,8 +58,9 @@ function QuizWorkspace({ task, topic, definition }: { task: CourseTask; topic: T
 
   return <div className="content quiz-page">
     <Link className="back-link" to={`/topic/${topic.id}`}>← {topic.title}</Link>
-    <p className="eyebrow">Квиз · без запуска кода</p>
+    <p className="eyebrow">Задание {getTaskNumber(task.id)} · Квиз · без запуска кода</p>
     <h1>{definition.title}</h1>
+    <div className="badges"><TaskPriorityBadge priority={task.priority} /></div>
     <p className="lede">{task.id === 'output-order'
       ? 'Предскажи полный порядок вывода. Стрелки разделяют отдельные строки console.log.'
       : 'Выбери точное объяснение поведения и способ исправления. Не каждый сниппет содержит функциональный баг.'}</p>

@@ -1,10 +1,12 @@
 import { getTaskDefinition, getQuizDefinition } from '../tasks';
+import { getTaskPriority, type TaskPriority } from './priorities';
 
 export type CourseTask = {
   id: string;
   title: string;
   path: string;
   runnable: boolean;
+  priority: TaskPriority;
   activity?: 'code' | 'quiz' | 'reading';
   previousTaskId?: string;
 };
@@ -21,7 +23,7 @@ export type Topic = {
 function task(id: string, title: string, path: string, previousTaskId?: string): CourseTask {
   const code = getTaskDefinition(id) !== undefined;
   const quiz = getQuizDefinition(id) !== undefined;
-  return { id, title, path, runnable: code || quiz, activity: quiz ? 'quiz' : code ? 'code' : 'reading', ...(previousTaskId ? { previousTaskId } : {}) };
+  return { id, title, path, priority: getTaskPriority(path), runnable: code || quiz, activity: quiz ? 'quiz' : code ? 'code' : 'reading', ...(previousTaskId ? { previousTaskId } : {}) };
 }
 
 export const topics: Topic[] = [
