@@ -190,16 +190,16 @@ function isValid(s) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/03-linear-structures/02-stack-queue/`](../practice/03-linear-structures/02-stack-queue/).
+Практика по теме: [Stack & Queue](../practice/03-linear-structures/02-stack-queue/).
 
 **🔴 Основные (обязательно):**
-1. [`01-valid-parentheses`](../practice/03-linear-structures/02-stack-queue/01-valid-parentheses.md) — базовый стек (разобрана выше — пиши по памяти).
-2. [`02-min-stack`](../practice/03-linear-structures/02-stack-queue/02-min-stack.md) — проектирование структуры, `getMin()` за `O(1)`.
-3. [`03-daily-temperatures`](../practice/03-linear-structures/02-stack-queue/03-daily-temperatures.md) — **monotonic stack**, важнейший подпаттерн.
+1. [Valid Parentheses](../practice/03-linear-structures/02-stack-queue/01-valid-parentheses.md) — базовый стек (разобрана выше — пиши по памяти).
+2. [Min Stack](../practice/03-linear-structures/02-stack-queue/02-min-stack.md) — проектирование структуры, `getMin()` за `O(1)`.
+3. [Daily Temperatures](../practice/03-linear-structures/02-stack-queue/03-daily-temperatures.md) — **monotonic stack**, важнейший подпаттерн.
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-evaluate-rpn`](../practice/03-linear-structures/02-stack-queue/04-evaluate-rpn.md) — обратная польская запись.
-5. [`05-queue-via-stacks`](../practice/03-linear-structures/02-stack-queue/05-queue-via-stacks.md) — амортизированный `O(1)`, любимый вопрос про сложность.
+4. [Evaluate Reverse Polish Notation](../practice/03-linear-structures/02-stack-queue/04-evaluate-rpn.md) — обратная польская запись.
+5. [Implement Queue using Stacks](../practice/03-linear-structures/02-stack-queue/05-queue-via-stacks.md) — амортизированный `O(1)`, любимый вопрос про сложность.
 
 ---
 

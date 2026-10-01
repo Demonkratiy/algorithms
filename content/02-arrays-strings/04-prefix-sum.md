@@ -143,16 +143,16 @@ function rangeSum(prefix, l, r) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/02-arrays-strings/04-prefix-sum/`](../practice/02-arrays-strings/04-prefix-sum/). Порядок:
+Файлы в [Prefix Sum (префиксные суммы)](../practice/02-arrays-strings/04-prefix-sum/). Порядок:
 
 **🔴 Основные (обязательно):**
-1. [`01-range-sum-query`](../practice/02-arrays-strings/04-prefix-sum/01-range-sum-query.md) — суммы на диапазонах, базовый массив префиксов. ← начни с неё
-2. [`02-subarray-sum-k`](../practice/02-arrays-strings/04-prefix-sum/02-subarray-sum-k.md) — prefix + `Map` (разобрана выше — пиши по памяти).
-3. [`03-pivot-index`](../practice/02-arrays-strings/04-prefix-sum/03-pivot-index.md) — «сумма слева = сумме справа», версия с `O(1)` памяти.
+1. [Range Sum Query — Immutable](../practice/02-arrays-strings/04-prefix-sum/01-range-sum-query.md) — суммы на диапазонах, базовый массив префиксов. ← начни с неё
+2. [Subarray Sum Equals K](../practice/02-arrays-strings/04-prefix-sum/02-subarray-sum-k.md) — prefix + `Map` (разобрана выше — пиши по памяти).
+3. [Find Pivot Index](../practice/02-arrays-strings/04-prefix-sum/03-pivot-index.md) — «сумма слева = сумме справа», версия с `O(1)` памяти.
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-product-except-self`](../practice/02-arrays-strings/04-prefix-sum/04-product-except-self.md) — префикс + суффикс, произведение вместо суммы.
-5. [`05-subarray-sums-divisible-by-k`](../practice/02-arrays-strings/04-prefix-sum/05-subarray-sums-divisible-by-k.md) — тот же скелет, но ключ `Map` — остаток.
+4. [Product of Array Except Self](../practice/02-arrays-strings/04-prefix-sum/04-product-except-self.md) — префикс + суффикс, произведение вместо суммы.
+5. [Subarray Sums Divisible by K](../practice/02-arrays-strings/04-prefix-sum/05-subarray-sums-divisible-by-k.md) — тот же скелет, но ключ `Map` — остаток.
 
 ---
 

@@ -222,7 +222,7 @@ function backtrack(state) {
 
 **Задачи этого семейства** (меняются только «доступные варианты» и условие готовности):
 - Subsets / Subsets II (с дубликатами — нужна сортировка + пропуск повторов);
-- Permutations / Permutations II — см. [`04-permutations`](04-permutations.md);
+- Permutations / Permutations II — см. [Permutations](04-permutations.md);
 - Combination Sum, Combinations;
 - Generate Parentheses;
 - Word Search, N-Queens, Sudoku Solver (там же появляется **pruning** — отсечение заведомо

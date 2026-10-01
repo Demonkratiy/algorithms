@@ -2,7 +2,7 @@
 
 **Тема:** dp («взять или не взять») · **Сложность:** medium · **Приоритет:** 🔴 основная
 
-> ⚠️ Разобрана в теории ([dp-basics.md](../../../07-dynamic-programming/01-dp-basics.md)).
+> ⚠️ Разобрана в теории ([Dynamic Programming](../../../07-dynamic-programming/01-dp-basics.md)).
 > Пиши **по памяти**. Шаблон «взять или не взять» — самый частый переход в DP.
 
 Дополнительная самостоятельная задача: [House Robber II](02-b-house-robber-ii.md).

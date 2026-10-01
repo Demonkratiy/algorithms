@@ -33,16 +33,16 @@ BFS находит минимальное число рёбер от старт�
 
 ## Что нужно знать заранее
 
-- [Binary Trees: DFS / BFS](../05-recursion-trees/02-binary-trees.md) — знакомые порядки обхода.
+- [Binary Trees (DFS / BFS)](../05-recursion-trees/02-binary-trees.md) — знакомые порядки обхода.
 - [Stack & Queue](../03-linear-structures/02-stack-queue.md) — структуры, управляющие следующим шагом.
 - [Matrix / 2D Arrays](../02-arrays-strings/05-matrix.md) — координаты, границы и форма grid.
-- [Array / Map / Set](../01-basics/02-data-structures.md) — хранение соседей и посещённых вершин.
+- [Структуры данных JS (Array / Object / Map / Set)](../01-basics/02-data-structures.md) — хранение соседей и посещённых вершин.
 
 Для рекурсивного DFS также вспомни [Call Stack](../05-recursion-trees/01-recursion.md). Отдельно уточняй, можно ли отмечать посещение прямо во входе: это mutation, а не бесплатная замена вспомогательного хранилища.
 
 ## Маршрут изучения
 
-1. [Graph Traversal: BFS / DFS](01-graph-traversal.md). Научись задавать соседей, учитывать повторные пути, обходить компоненты и видеть implicit graph в сетке.
+1. [Graph Traversal (BFS / DFS)](01-graph-traversal.md). Научись задавать соседей, учитывать повторные пути, обходить компоненты и видеть implicit graph в сетке.
 2. [Topological Sort](02-topological-sort.md). Перейди от достижимости к зависимостям: разбери входящие рёбра, доступные к обработке вершины и обнаружение невозможного порядка.
 
 Queue в алгоритме Kahn не делает Topological Sort обычным BFS кратчайших путей. Здесь вершина становится доступной после выполнения prerequisites, а не просто после посещения одного соседа.

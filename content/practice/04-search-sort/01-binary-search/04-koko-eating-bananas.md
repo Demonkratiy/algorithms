@@ -212,7 +212,7 @@ return left;
 - Split Array Largest Sum — минимальная из максимальных сумм частей;
 - Minimum Number of Days to Make m Bouquets;
 - Find the Smallest Divisor Given a Threshold;
-- Sqrt(x) — целочисленный корень (см. [`06-sqrt`](06-sqrt.md)).
+- Sqrt(x) — целочисленный корень (см. [Sqrt(x)](06-sqrt.md)).
 
 Узнаваемый маркер в условии: **«минимальное/максимальное значение, при котором выполняется
 условие»** + «проверить конкретное значение легко».

@@ -218,22 +218,22 @@ function robOptimized(nums) {
 `6` жадность даёт `4 + 1 + 1 = 3 монеты`, а оптимум `3 + 3 = 2 монеты`. Нашёл контрпример —
 нужен DP. Не нашёл и можешь обосновать — greedy.
 
-Подробнее — в [greedy.md](02-greedy.md).
+Подробнее — в [Greedy](02-greedy.md).
 
 ---
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/07-dynamic-programming/01-dp-basics/`](../practice/07-dynamic-programming/01-dp-basics/).
+Практика по теме: [Dynamic Programming](../practice/07-dynamic-programming/01-dp-basics/).
 
 **🔴 Основные (обязательно):**
-1. [`01-climbing-stairs`](../practice/07-dynamic-programming/01-dp-basics/01-climbing-stairs.md) — «вход» в DP, три формы записи.
-2. [`02-house-robber`](../practice/07-dynamic-programming/01-dp-basics/02-house-robber.md) — «взять или не взять» (разобрана выше — пиши по памяти). Отдельно: [House Robber II](../practice/07-dynamic-programming/01-dp-basics/02-b-house-robber-ii.md).
-3. [`03-coin-change`](../practice/07-dynamic-programming/01-dp-basics/03-coin-change.md) — DP по сумме, минимизация; контрпример жадности. Отдельно: [Coin Change II](../practice/07-dynamic-programming/01-dp-basics/03-b-coin-change-ii.md).
+1. [Climbing Stairs](../practice/07-dynamic-programming/01-dp-basics/01-climbing-stairs.md) — «вход» в DP, три формы записи.
+2. [House Robber](../practice/07-dynamic-programming/01-dp-basics/02-house-robber.md) — «взять или не взять» (разобрана выше — пиши по памяти). Отдельно: [House Robber II](../practice/07-dynamic-programming/01-dp-basics/02-b-house-robber-ii.md).
+3. [Coin Change](../practice/07-dynamic-programming/01-dp-basics/03-coin-change.md) — DP по сумме, минимизация; контрпример жадности. Отдельно: [Coin Change II](../practice/07-dynamic-programming/01-dp-basics/03-b-coin-change-ii.md).
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-longest-increasing-subsequence`](../practice/07-dynamic-programming/01-dp-basics/04-longest-increasing-subsequence.md) — `O(N²)` и бонус `O(N log N)`.
-5. [`05-unique-paths`](../practice/07-dynamic-programming/01-dp-basics/05-unique-paths.md) — двумерное DP на сетке. Отдельно: [Unique Paths II](../practice/07-dynamic-programming/01-dp-basics/05-b-unique-paths-ii.md).
+4. [Longest Increasing Subsequence](../practice/07-dynamic-programming/01-dp-basics/04-longest-increasing-subsequence.md) — `O(N²)` и бонус `O(N log N)`.
+5. [Unique Paths](../practice/07-dynamic-programming/01-dp-basics/05-unique-paths.md) — двумерное DP на сетке. Отдельно: [Unique Paths II](../practice/07-dynamic-programming/01-dp-basics/05-b-unique-paths-ii.md).
 
 ---
 

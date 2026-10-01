@@ -170,6 +170,6 @@ function mergeTwoListsRecursive(list1, list2) {
 Сравни с задачей [Merge Sorted Arrays](../../02-arrays-strings/01-two-pointers/03-merge-sorted-arrays.md), которую ты
 уже решал. Логика идентична, отличается только «как присоединить элемент»:
 `result.push(x)` против `tail.next = node; tail = tail.next;`.
-Это же слияние — шаг `merge` в merge sort (см. [sorting.md](../../../04-search-sort/02-sorting.md)).
+Это же слияние — шаг `merge` в merge sort (см. [Sorting](../../../04-search-sort/02-sorting.md)).
 
 </details>

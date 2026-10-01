@@ -226,15 +226,15 @@ function numIslandsBFS(grid) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/06-graphs/01-graph-traversal/`](../practice/06-graphs/01-graph-traversal/).
+Практика по теме: [Graph Traversal (BFS / DFS)](../practice/06-graphs/01-graph-traversal/).
 
 **🔴 Основные (обязательно):**
-1. [`01-number-of-islands`](../practice/06-graphs/01-graph-traversal/01-number-of-islands.md) — компоненты связности на сетке (разобрана выше — пиши по памяти).
-2. [`02-rotting-oranges`](../practice/06-graphs/01-graph-traversal/02-rotting-oranges.md) — **multi-source BFS**, «за сколько шагов».
-3. [`03-clone-graph`](../practice/06-graphs/01-graph-traversal/03-clone-graph.md) — обход + `Map` соответствий.
+1. [Number of Islands](../practice/06-graphs/01-graph-traversal/01-number-of-islands.md) — компоненты связности на сетке (разобрана выше — пиши по памяти).
+2. [Rotting Oranges](../practice/06-graphs/01-graph-traversal/02-rotting-oranges.md) — **multi-source BFS**, «за сколько шагов».
+3. [Clone Graph](../practice/06-graphs/01-graph-traversal/03-clone-graph.md) — обход + `Map` соответствий.
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-word-search`](../practice/06-graphs/01-graph-traversal/04-word-search.md) — DFS + **backtracking** на сетке.
+4. [Word Search](../practice/06-graphs/01-graph-traversal/04-word-search.md) — DFS + **backtracking** на сетке.
 
 ---
 

@@ -15,7 +15,7 @@
 `interval` — положительное целое число. Точная граница интервала уже разрешает новый вызов.
 
 Версия с trailing — отдельная задача
-[`02-b Throttle (leading + trailing)`](02-b-throttle-trailing.md), с отдельной обёрткой
+[Throttle — leading + trailing](02-b-throttle-trailing.md), с отдельной обёрткой
 `throttleTrailing(fn, interval)` и отдельной проверкой.
 
 ## Примеры

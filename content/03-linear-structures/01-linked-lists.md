@@ -200,17 +200,17 @@ function toArray(head) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/03-linear-structures/01-linked-lists/`](../practice/03-linear-structures/01-linked-lists/).
+Практика по теме: [Linked Lists (связные списки)](../practice/03-linear-structures/01-linked-lists/).
 
 **🔴 Основные (обязательно):**
-1. [`01-reverse-linked-list`](../practice/03-linear-structures/01-linked-lists/01-reverse-linked-list.md) — три указателя (разобрана выше — пиши по памяти).
-2. [`02-middle-of-list`](../practice/03-linear-structures/01-linked-lists/02-middle-of-list.md) — fast/slow, база для многих задач.
-3. [`03-linked-list-cycle`](../practice/03-linear-structures/01-linked-lists/03-linked-list-cycle.md) — обнаружение цикла (алгоритм Флойда); [Cycle Entry](../practice/03-linear-structures/01-linked-lists/03-b-linked-list-cycle-entry.md) — отдельный поиск входа.
-4. [`04-merge-two-sorted-lists`](../practice/03-linear-structures/01-linked-lists/04-merge-two-sorted-lists.md) — dummy node + слияние.
+1. [Reverse Linked List](../practice/03-linear-structures/01-linked-lists/01-reverse-linked-list.md) — три указателя (разобрана выше — пиши по памяти).
+2. [Middle of the Linked List](../practice/03-linear-structures/01-linked-lists/02-middle-of-list.md) — fast/slow, база для многих задач.
+3. [Linked List Cycle](../practice/03-linear-structures/01-linked-lists/03-linked-list-cycle.md) — обнаружение цикла (алгоритм Флойда); [Cycle Entry](../practice/03-linear-structures/01-linked-lists/03-b-linked-list-cycle-entry.md) — отдельный поиск входа.
+4. [Merge Two Sorted Lists](../practice/03-linear-structures/01-linked-lists/04-merge-two-sorted-lists.md) — dummy node + слияние.
 
 **⚪ Дополнительные (если есть время):**
-5. [`05-remove-nth-from-end`](../practice/03-linear-structures/01-linked-lists/05-remove-nth-from-end.md) — два указателя с зазором + dummy.
-6. [`06-palindrome-linked-list`](../practice/03-linear-structures/01-linked-lists/06-palindrome-linked-list.md) — комбинация «середина + разворот».
+5. [Remove Nth Node From End of List](../practice/03-linear-structures/01-linked-lists/05-remove-nth-from-end.md) — два указателя с зазором + dummy.
+6. [Palindrome Linked List](../practice/03-linear-structures/01-linked-lists/06-palindrome-linked-list.md) — комбинация «середина + разворот».
 
 ---
 

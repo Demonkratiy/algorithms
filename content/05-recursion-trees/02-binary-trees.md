@@ -274,7 +274,7 @@ function buildTree(arr) {
 - ❌ **Забыть `levelSize` в BFS** → уровни смешаются.
 - ❌ **`queue.shift()`** — это `O(N)`. На маленьких деревьях допустимо, но **проговори**, что
   знаешь про стоимость и что правильнее указатель головы (см.
-  [stack-queue.md](../03-linear-structures/02-stack-queue.md)).
+  [Stack & Queue](../03-linear-structures/02-stack-queue.md)).
 - ❌ **Путать глубину и высоту.** Глубина узла — расстояние **от корня**; высота — расстояние
   **до самого дальнего листа**. Для дерева целиком они совпадают.
 - ❌ **Проверять BST только «сын меньше отца»** — неверно, нужны **диапазоны** (см. задачу
@@ -286,17 +286,17 @@ function buildTree(arr) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/05-recursion-trees/02-binary-trees/`](../practice/05-recursion-trees/02-binary-trees/).
+Практика по теме: [Binary Trees (DFS / BFS)](../practice/05-recursion-trees/02-binary-trees/).
 
 **🔴 Основные (обязательно):**
-1. [`01-max-depth`](../practice/05-recursion-trees/02-binary-trees/01-max-depth.md) — базовый DFS-контракт (разобрана выше — пиши по памяти). Отдельно: [Minimum Depth of Binary Tree](../practice/05-recursion-trees/02-binary-trees/01-b-min-depth.md).
-2. [`02-invert-tree`](../practice/05-recursion-trees/02-binary-trees/02-invert-tree.md) — самая знаменитая задача про деревья.
-3. [`03-level-order`](../practice/05-recursion-trees/02-binary-trees/03-level-order.md) — **BFS по уровням**, приём с `levelSize`.
-4. [`04-validate-bst`](../practice/05-recursion-trees/02-binary-trees/04-validate-bst.md) — BST и передача диапазонов вниз.
+1. [Maximum Depth of Binary Tree](../practice/05-recursion-trees/02-binary-trees/01-max-depth.md) — базовый DFS-контракт (разобрана выше — пиши по памяти). Отдельно: [Minimum Depth of Binary Tree](../practice/05-recursion-trees/02-binary-trees/01-b-min-depth.md).
+2. [Invert Binary Tree](../practice/05-recursion-trees/02-binary-trees/02-invert-tree.md) — самая знаменитая задача про деревья.
+3. [Binary Tree Level Order Traversal](../practice/05-recursion-trees/02-binary-trees/03-level-order.md) — **BFS по уровням**, приём с `levelSize`.
+4. [Validate Binary Search Tree](../practice/05-recursion-trees/02-binary-trees/04-validate-bst.md) — BST и передача диапазонов вниз.
 
 **⚪ Дополнительные (если есть время):**
-5. [`05-diameter`](../practice/05-recursion-trees/02-binary-trees/05-diameter.md) — «ответ в узле, а возврат другой» — важный приём.
-6. [`06-lowest-common-ancestor`](../practice/05-recursion-trees/02-binary-trees/06-lowest-common-ancestor.md) — LCA, классика. Отдельно: [Lowest Common Ancestor — Binary Tree](../practice/05-recursion-trees/02-binary-trees/06-b-lowest-common-ancestor-binary-tree.md).
+5. [Diameter of Binary Tree](../practice/05-recursion-trees/02-binary-trees/05-diameter.md) — «ответ в узле, а возврат другой» — важный приём.
+6. [Lowest Common Ancestor — BST](../practice/05-recursion-trees/02-binary-trees/06-lowest-common-ancestor.md) — LCA, классика. Отдельно: [Lowest Common Ancestor — Binary Tree](../practice/05-recursion-trees/02-binary-trees/06-b-lowest-common-ancestor-binary-tree.md).
 
 ---
 

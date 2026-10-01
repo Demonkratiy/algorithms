@@ -134,12 +134,12 @@ function reverse(arr) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/02-arrays-strings/01-two-pointers/`](../practice/02-arrays-strings/01-two-pointers/).
+Практика по теме: [Two Pointers](../practice/02-arrays-strings/01-two-pointers/).
 
 **🔴 Основные (обязательно):**
-1. [`01-valid-palindrome`](../practice/02-arrays-strings/01-two-pointers/01-valid-palindrome.md) — проверка палиндрома (указатели навстречу). ← начни с неё
-2. [`02-move-zeroes`](../practice/02-arrays-strings/01-two-pointers/02-move-zeroes.md) — сдвинуть нули в конец (fast/slow).
-3. [`03-merge-sorted-arrays`](../practice/02-arrays-strings/01-two-pointers/03-merge-sorted-arrays.md) — слияние двух отсортированных массивов.
+1. [Valid Palindrome](../practice/02-arrays-strings/01-two-pointers/01-valid-palindrome.md) — проверка палиндрома (указатели навстречу). ← начни с неё
+2. [Move Zeroes](../practice/02-arrays-strings/01-two-pointers/02-move-zeroes.md) — сдвинуть нули в конец (fast/slow).
+3. [Merge Two Sorted Arrays](../practice/02-arrays-strings/01-two-pointers/03-merge-sorted-arrays.md) — слияние двух отсортированных массивов.
 
 **Для закрепления (без отдельных файлов):**
 - Разворот массива на месте — разобран выше, напиши по памяти.

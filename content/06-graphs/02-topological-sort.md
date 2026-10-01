@@ -164,13 +164,13 @@ function topoSortDFS(numNodes, graph) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/06-graphs/02-topological-sort/`](../practice/06-graphs/02-topological-sort/).
+Практика по теме: [Topological Sort](../practice/06-graphs/02-topological-sort/).
 
 **🔴 Основные (обязательно):**
-1. [`01-course-schedule`](../practice/06-graphs/02-topological-sort/01-course-schedule.md) — «можно ли пройти все курсы» = обнаружение цикла.
+1. [Course Schedule](../practice/06-graphs/02-topological-sort/01-course-schedule.md) — «можно ли пройти все курсы» = обнаружение цикла.
 
 **⚪ Дополнительные (если есть время):**
-2. [`02-course-schedule-ii`](../practice/06-graphs/02-topological-sort/02-course-schedule-ii.md) — вернуть сам порядок.
+2. [Course Schedule II](../practice/06-graphs/02-topological-sort/02-course-schedule-ii.md) — вернуть сам порядок.
 
 ---
 

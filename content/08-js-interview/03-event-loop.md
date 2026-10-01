@@ -227,13 +227,13 @@ function tick() {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/08-js-interview/03-event-loop/`](../practice/08-js-interview/03-event-loop/).
+Практика по теме: [Event Loop и асинхронность](../practice/08-js-interview/03-event-loop/).
 
 **🔴 Основные (обязательно):**
-1. [`01-output-order`](../practice/08-js-interview/03-event-loop/01-output-order.md) — шесть головоломок «что выведется» с трассировками.
-2. [`02-async-traps`](../practice/08-js-interview/03-event-loop/02-async-traps.md) — найди и исправь баг в асинхронном коде.
+1. [«Что выведется?» — порядок выполнения](../practice/08-js-interview/03-event-loop/01-output-order.md) — шесть головоломок «что выведется» с трассировками.
+2. [Найди и исправь баг в асинхронном коде](../practice/08-js-interview/03-event-loop/02-async-traps.md) — найди и исправь баг в асинхронном коде.
 
-> ➡️ Дальше — [04-promises.md](04-promises.md): та же асинхронность, но со стороны реализации
+> ➡️ Дальше — [JS: промисы на практике](04-promises.md): та же асинхронность, но со стороны реализации
 > (`sleep`, `withTimeout`, `retry`, ограничение параллелизма, отмена).
 
 ---

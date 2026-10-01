@@ -2,7 +2,7 @@
 
 ## 🎯 Зачем эта тема
 
-Соседняя тема [03-event-loop.md](03-event-loop.md) отвечает на вопрос **«когда выполнится»**.
+Соседняя тема [Event Loop и асинхронность](03-event-loop.md) отвечает на вопрос **«когда выполнится»**.
 Эта — на вопрос **«как написать»**: реализовать обёртку, ограничить параллелизм, поставить
 таймаут, отменить лишний запрос.
 
@@ -162,15 +162,15 @@ function withTimeout(promise, ms, message = `Timeout after ${ms}ms`) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/08-js-interview/04-promises/`](../practice/08-js-interview/04-promises/).
+Практика по теме: [JS: промисы на практике](../practice/08-js-interview/04-promises/).
 
 **🔴 Основные (обязательно):**
-1. [`01-sleep-retry-timeout`](../practice/08-js-interview/04-promises/01-sleep-retry-timeout.md) — только `sleep`; отдельно [withTimeout](../practice/08-js-interview/04-promises/01-b-with-timeout.md) (разобран выше) и [retry](../practice/08-js-interview/04-promises/01-c-retry.md) с backoff.
-2. [`02-promise-pool`](../practice/08-js-interview/04-promises/02-promise-pool.md) — ограничение параллелизма, амортизация «воркерами».
+1. [sleep — неблокирующая пауза](../practice/08-js-interview/04-promises/01-sleep-retry-timeout.md) — только `sleep`; отдельно [withTimeout](../practice/08-js-interview/04-promises/01-b-with-timeout.md) (разобран выше) и [retry](../practice/08-js-interview/04-promises/01-c-retry.md) с backoff.
+2. [Promise Pool](../practice/08-js-interview/04-promises/02-promise-pool.md) — ограничение параллелизма, амортизация «воркерами».
 
 **⚪ Дополнительные (если есть время):**
-3. [`03-promise-all`](../practice/08-js-interview/04-promises/03-promise-all.md) — свой `all`; отдельно [allSettled](../practice/08-js-interview/04-promises/03-b-promise-all-settled.md), [race](../practice/08-js-interview/04-promises/03-c-promise-race.md), [any](../practice/08-js-interview/04-promises/03-d-promise-any.md).
-4. [`04-cancellation`](../practice/08-js-interview/04-promises/04-cancellation.md) — логическая отмена; отдельно [AbortController](../practice/08-js-interview/04-promises/04-b-fetch-with-abort.md) и [поиск без гонки запросов](../practice/08-js-interview/04-promises/04-c-latest-search.md).
+3. [Свой Promise.all](../practice/08-js-interview/04-promises/03-promise-all.md) — свой `all`; отдельно [allSettled](../practice/08-js-interview/04-promises/03-b-promise-all-settled.md), [race](../practice/08-js-interview/04-promises/03-c-promise-race.md), [any](../practice/08-js-interview/04-promises/03-d-promise-any.md).
+4. [cancellable — логическая отмена](../practice/08-js-interview/04-promises/04-cancellation.md) — логическая отмена; отдельно [AbortController](../practice/08-js-interview/04-promises/04-b-fetch-with-abort.md) и [поиск без гонки запросов](../practice/08-js-interview/04-promises/04-c-latest-search.md).
 
 ---
 
