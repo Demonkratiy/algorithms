@@ -105,6 +105,22 @@ p { margin: 0 0 16px; }
 .priority-core { color: var(--accent); background: var(--tint); }
 .priority-optional { color: var(--muted); background: var(--subtle); }
 .course-sections { margin-top: 32px; }
+.welcome-page { max-width: 1150px; }
+.welcome-hero { max-width: 800px; padding: 12px 0 24px; }
+.welcome-hero h1 { font-size: clamp(30px, 3.4vw, 44px); max-width: 650px; margin: 16px 0 20px; }
+.welcome-hero .button-group { margin-top: 24px; }
+.welcome-caption { margin-top: 14px; }
+.welcome-section { margin: 20px 0 28px; }
+.welcome-steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; list-style: none; padding: 0; counter-reset: learning-step; }
+.welcome-steps li { padding: 22px; counter-increment: learning-step; }
+.welcome-steps h3 { margin-top: 0; }
+.welcome-steps h3::before { content: counter(learning-step) ". "; color: var(--accent); }
+.welcome-steps p, .welcome-grid p:last-child, .welcome-storage p:last-child { margin-bottom: 0; }
+.welcome-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.welcome-grid .card { padding: 24px; margin: 0; }
+.welcome-grid ul { padding-left: 20px; margin-bottom: 0; }
+.welcome-grid li + li { margin-top: 10px; }
+.welcome-storage { margin-top: 24px; }
 .course-section + .course-section { border-top: 1px solid var(--line); margin-top: 30px; padding-top: 28px; }
 .course-section-heading { display: flex; align-items: center; gap: 12px; }
 .course-section-heading h2 { margin: 0; }
@@ -262,6 +278,7 @@ html:has(.panel-divider.dragging) { overflow-anchor: none; }
 .panel-divider.disabled { visibility: hidden; cursor: default; }
 .practice-notes { margin-top: 18px; }
 @media (max-width: 650px) {
+  .welcome-steps, .welcome-grid { grid-template-columns: minmax(0, 1fr); }
   .layout-toolbar > span { max-width: 170px; }
   .panel-grid { height: max(800px, calc(100dvh - 150px)); }
   .editor-actions { padding: 8px; }

@@ -1,5 +1,48 @@
 import { expect, test } from '@playwright/test';
 
+for (const source of ['/topic/two-pointers', '/section/06-graphs', '/task/range-sum-query', '/task/output-order']) {
+  test(`all topics starts at the top after a scrolled ${source}`, async ({ page }) => {
+    await page.goto(`/#${source}`);
+    if (source === '/task/range-sum-query') {
+      await page.getByRole('button', { name: 'Вертикально', exact: true }).click();
+    } else if (!source.startsWith('/task/')) {
+      await expect(page.locator('.article .markdown')).toBeVisible();
+    } else {
+      await expect(page.locator('.quiz-question')).toHaveCount(6);
+    }
+    await page.evaluate(() => window.scrollTo(0, 600));
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    await page.getByRole('navigation', { name: 'Разделы курса' }).getByRole('link', { name: 'Все темы', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Все темы', exact: true })).toBeVisible();
+    await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  });
+}
+
+test('catalog resets scroll on repeated activation and browser history', async ({ page }) => {
+  await page.goto('/#/topics');
+  const nav = page.getByRole('navigation', { name: 'Разделы курса' });
+  const catalog = nav.getByRole('link', { name: 'Все темы', exact: true });
+  await catalog.focus();
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await catalog.press('Enter');
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await page.locator('.breadcrumb').getByRole('link', { name: 'Обучение', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await page.locator('.course-section-heading').getByRole('link', { name: 'Графы', exact: true }).click();
+  await expect(page.locator('.article .markdown')).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await nav.getByRole('link', { name: 'Все темы', exact: true }).click();
+  await expect(catalog).toHaveAttribute('aria-current', 'page');
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await page.goBack();
+  await expect(page).toHaveURL(/#\/section\/06-graphs$/);
+  await page.goForward();
+  await expect(catalog).toHaveAttribute('aria-current', 'page');
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+});
+
 for (const [id, taskLabel, topicId, topicLabel, sectionId, sectionLabel] of [
   ['rotting-oranges', '6.1.2 · Rotting Oranges', 'graph-traversal', '6.1 · Graph Traversal (BFS / DFS)', '06-graphs', '6 · Графы'],
   ['lowest-common-ancestor-binary-tree', '5.2.8 · Lowest Common Ancestor — Binary Tree', 'binary-trees', '5.2 · Binary Trees (DFS / BFS)', '05-recursion-trees', '5 · Рекурсия и деревья'],
@@ -66,7 +109,7 @@ const sections = [
 
 for (const [index, [id, title, firstTopic, count]] of sections.entries()) {
   test(`section ${index + 1} overview loads from catalog and direct URL with its learning route`, async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/topics');
     await page.locator('.course-section-heading').getByRole('link', { name: title, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`#/section/${id}$`));
     await expect(page.locator('.section-page > h1')).toHaveText(title);
@@ -153,7 +196,7 @@ test('section overview and breadcrumbs fit a narrow viewport', async ({ page }) 
 });
 
 test('catalog groups cards and uses the same hierarchical numbers as the sidebar', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/topics');
   await expect(page.locator('.course-section')).toHaveCount(8);
   await expect(page.locator('.topic-card')).toHaveCount(22);
   const arrays = page.getByRole('region', { name: 'Массивы и строки', exact: true });
@@ -166,7 +209,7 @@ test('catalog groups cards and uses the same hierarchical numbers as the sidebar
 });
 
 test('section and topic disclosures toggle without navigation and expose task links', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/topics');
   const nav = page.getByRole('navigation', { name: 'Разделы курса' });
   const section = nav.getByRole('button', { name: /раздел 2: Массивы и строки/ });
   await expect(section).toHaveAttribute('aria-expanded', 'false');
@@ -175,7 +218,7 @@ test('section and topic disclosures toggle without navigation and expose task li
   const topic = nav.getByRole('button', { name: /тему 2\.1: Two Pointers$/ });
   await topic.focus(); await topic.press('Space');
   await expect(topic).toHaveAttribute('aria-expanded', 'true');
-  await expect(page).toHaveURL(/\/(?:#\/)?$/);
+  await expect(page).toHaveURL(/#\/topics$/);
   await nav.getByRole('link', { name: /Move Zeroes/ }).click();
   await expect(page).toHaveURL(/#\/task\/move-zeroes$/);
   await expect(nav.getByRole('link', { name: /Move Zeroes/ })).toHaveAttribute('aria-current', 'page');
@@ -267,13 +310,13 @@ test('hiding the menu preserves disclosures and grouped catalog fits a small scr
   await page.getByRole('button', { name: 'Показать меню', exact: true }).click();
   await expect(nav.getByRole('button', { name: /тему 2\.4: Prefix Sum/ })).toHaveAttribute('aria-expanded', 'true');
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/#/topics');
   await expect(page.locator('.course-section')).toHaveCount(8);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
 test('topic title opens theory immediately and repeated clicks toggle without a navigation loop', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/topics');
   const nav = page.getByRole('navigation', { name: 'Разделы курса' });
   await nav.getByRole('button', { name: /раздел 2: Массивы и строки/ }).click();
   const toggle = nav.getByRole('button', { name: /тему 2\.1: Two Pointers$/ });
@@ -300,7 +343,7 @@ test('topic title opens theory immediately and repeated clicks toggle without a 
   await title.press('Enter');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await page.goBack();
-  await expect(page).toHaveURL(/\/(?:#\/)?$/);
+  await expect(page).toHaveURL(/#\/topics$/);
 });
 
 test('topic selection from a task opens theory even when its children were already expanded', async ({ page }) => {

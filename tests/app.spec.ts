@@ -23,8 +23,8 @@ test('navigation hover uses accent color without underlining in both themes', as
 });
 
 test('course, theory and JS practice are available', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Учимся решать, а не запоминать' })).toBeVisible();
+  await page.goto('/#/topics');
+  await expect(page.getByRole('heading', { name: 'Все темы', exact: true })).toBeVisible();
   const catalog = page.getByRole('navigation', { name: 'Разделы курса' }).getByRole('link', { name: 'Все темы', exact: true });
   await expect(catalog).toHaveText('Все темы');
   await expect(catalog).toHaveAttribute('aria-current', 'page');

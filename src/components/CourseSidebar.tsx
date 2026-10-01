@@ -17,7 +17,7 @@ export function CourseSidebar({ visible }: { visible: boolean }) {
     if (sectionId) {
       setOpenSection(sectionId);
       setOpenTopic(topicId ?? null);
-    } else if (pathname === '/') {
+    } else if (pathname === '/' || pathname === '/topics') {
       setOpenSection(null);
       setOpenTopic(null);
     }
@@ -36,11 +36,16 @@ export function CourseSidebar({ visible }: { visible: boolean }) {
   }, [pathname, sectionId, topicId, openSection, openTopic, visible]);
 
   return <aside id="course-sidebar" className="sidebar" aria-label="Навигация по курсу">
-    <Link className="logo" to="/"><span className="logo-mark">&lt;/&gt;</span>algo<span className="logo-dot">.</span></Link>
+    <Link className="logo" to="/" aria-label="Algo — главная" aria-current={pathname === '/' ? 'page' : undefined}>
+      <span className="logo-mark">&lt;/&gt;</span>algo<span className="logo-dot">.</span>
+    </Link>
     <nav ref={navigation} className="sidebar-course" aria-label="Разделы курса">
-      <NavLink className="nav-link catalog-nav" to="/" end onClick={event => {
+      <NavLink className="nav-link catalog-nav" to="/topics" end onClick={event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-        if (pathname === '/') event.preventDefault();
+        if (pathname === '/topics') {
+          event.preventDefault();
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
         setOpenSection(null);
         setOpenTopic(null);
       }}>Все темы</NavLink>

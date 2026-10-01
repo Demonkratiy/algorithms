@@ -35,7 +35,7 @@ test('dragging the sidebar moves the page edge, respects bounds and persists on 
 });
 
 test('keyboard resizing survives navigation, hide/show and mobile without changing desktop preference', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/topics');
   const handle = separator(page);
   await handle.focus();
   await handle.press('ArrowRight');
