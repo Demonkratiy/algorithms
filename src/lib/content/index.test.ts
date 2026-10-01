@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { topics } from '../../../content/course';
+import { courseSections } from './navigation';
 import { getTaskDefinition, getQuizDefinition, taskDefinitions, quizDefinitions } from '../../../tasks';
 import { getMarkdown, splitTaskMarkdown } from './index';
 import { parseQuizMarkdown } from '../../features/quiz/content';
@@ -108,6 +109,20 @@ PRIVATE`);
 });
 
 describe('course catalog and migration', () => {
+  it('loads eight complete overviews with relative links to every topic in course order', async () => {
+    for (const section of courseSections) {
+      const markdown = await getMarkdown(section.overviewPath);
+      expect(markdown).toBe(readFileSync(join(content, section.overviewPath), 'utf8'));
+      for (const heading of ['Общая идея', 'Где это встречается', 'Что нужно знать заранее', 'Маршрут изучения', 'Что получится после раздела']) {
+        expect(markdown, section.id).toContain(`## ${heading}`);
+      }
+      const route = markdown.split('## Маршрут изучения')[1].split('\n## ')[0];
+      const targets = [...route.matchAll(/\[[^\]\n]*\]\(([^)\n]+)\)/g)]
+        .map(match => relative(content, resolve(content, dirname(section.overviewPath), match[1])).replaceAll('\\', '/'));
+      expect(targets, section.id).toEqual(section.topics.map(({ topic }) => topic.theoryPath));
+    }
+  });
+
   it('covers exactly 22 theory topics and 101 activities with stable unique IDs and paths', () => {
     expect(topics).toHaveLength(22);
     expect(tasks).toHaveLength(101);
@@ -127,7 +142,7 @@ describe('course catalog and migration', () => {
     const theoryPaths = markdownFiles(content)
       .map((path) => relative(content, path).replaceAll('\\', '/'))
       .filter((path) => /^0[1-8]-/.test(path));
-    expect(topics.map((topic) => topic.theoryPath).sort()).toEqual(theoryPaths.sort());
+    expect([...topics.map((topic) => topic.theoryPath), ...courseSections.map(section => section.overviewPath)].sort()).toEqual(theoryPaths.sort());
     expect(tasks.filter((task) => task.runnable).map((task) => task.id).sort())
       .toEqual([...taskDefinitions, ...quizDefinitions].map((definition) => definition.id).sort());
     for (const task of tasks) {

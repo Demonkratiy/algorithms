@@ -7,11 +7,14 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeSlug from 'rehype-slug';
 import { topics } from '../../content/course';
 import { getMarkdown } from '../lib/content';
+import { courseSections } from '../lib/content/navigation';
 
 function contentLink(href: string, path: string): string {
   if (/^(https?:|mailto:|#)/i.test(href)) return href;
   const url = new URL(href, `https://content.local/${path}`);
   const file = decodeURIComponent(url.pathname.slice(1));
+  const section = courseSections.find(entry => entry.overviewPath === file || `${entry.id}/` === file);
+  if (section) return `/section/${section.id}${url.hash}`;
   const topic = topics.find(t => t.theoryPath === file);
   if (topic) return `/topic/${topic.id}${url.hash}`;
   for (const entry of topics) {

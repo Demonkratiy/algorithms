@@ -38,6 +38,14 @@ describe('course navigation hierarchy', () => {
     expect(() => groupCourseTopics([topics[0], { ...topics[1], section: '01. Другое название' }])).toThrow();
     expect(() => groupCourseTopics([{ ...topics[0], theoryPath: 'basics/big-o.md' }])).toThrow();
   });
+  it('resolves section overviews without assigning them topic or task numbers', () => {
+    for (const section of courseSections) {
+      expect(section.overviewPath).toBe(`${section.id}/README.md`);
+      expect(findCourseLocation(`/section/${section.id}`)).toEqual({ section, number: section.number, topic: undefined });
+    }
+    expect(findCourseLocation('/section/06-graphs-extra')).toBeUndefined();
+    expect(findCourseLocation('/section/missing')).toBeUndefined();
+  });
   it('numbers every task by its actual catalog position, including split parts', () => {
     const numbers: string[] = [];
     for (const section of courseSections) {

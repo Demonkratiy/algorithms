@@ -1,7 +1,7 @@
 import { topics, type Topic } from '../../../content/course';
 
 export type NumberedTopic = { topic: Topic; number: string };
-export type CourseSection = { id: string; number: string; title: string; topics: NumberedTopic[] };
+export type CourseSection = { id: string; number: string; title: string; overviewPath: string; topics: NumberedTopic[] };
 
 export function groupCourseTopics(items: readonly Topic[]): CourseSection[] {
   const groups = new Map<string, CourseSection>();
@@ -14,7 +14,7 @@ export function groupCourseTopics(items: readonly Topic[]): CourseSection[] {
     }
     let group = groups.get(folder);
     if (!group) {
-      group = { id: folder, number: String(Number(pathNumber)), title: section[2], topics: [] };
+      group = { id: folder, number: String(Number(pathNumber)), title: section[2], overviewPath: `${folder}/README.md`, topics: [] };
       groups.set(folder, group);
     } else if (group.title !== section[2]) {
       throw new Error(`Разные названия одного раздела: ${folder}.`);
@@ -36,6 +36,7 @@ export function getTaskNumber(id: string): string {
 
 export function findCourseLocation(pathname: string) {
   for (const section of courseSections) {
+    if (pathname === `/section/${section.id}`) return { section, number: section.number, topic: undefined };
     for (const entry of section.topics) {
       if (pathname === `/topic/${entry.topic.id}` || entry.topic.tasks.some(task => pathname === `/task/${task.id}`)) {
         return { section, ...entry };

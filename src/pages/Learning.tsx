@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { topics, type Topic } from '../../content/course';
 import { Markdown, useMarkdown } from '../components/Markdown';
-import { courseSections, findCourseLocation, getTaskNumber } from '../lib/content/navigation';
+import { courseSections, findCourseLocation, getTaskNumber, type CourseSection } from '../lib/content/navigation';
 import { TaskPriorityBadge } from '../components/TaskPriorityBadge';
 
 export function CoursePage() {
@@ -15,7 +15,7 @@ export function CoursePage() {
     <div className="course-sections">{courseSections.map(section => <section className="course-section" key={section.id} aria-labelledby={`course-section-${section.id}`}>
       <header className="course-section-heading">
         <span className="course-section-number" aria-hidden="true">{section.number}</span>
-        <h2 id={`course-section-${section.id}`}>{section.title}</h2>
+        <h2 id={`course-section-${section.id}`}><Link to={`/section/${section.id}`}>{section.title}</Link></h2>
       </header>
       <div className="course-grid">{section.topics.map(({ topic, number }) => <Link className="card topic-card" key={topic.id} to={`/topic/${topic.id}`}>
         <span className="eyebrow">Тема {number}</span>
@@ -23,6 +23,36 @@ export function CoursePage() {
       </Link>)}</div>
     </section>)}</div>
   </div>;
+}
+
+function SectionView({ section }: { section: CourseSection }) {
+  const { text, error, loading } = useMarkdown(section.overviewPath);
+  return <div className="content section-page">
+    <div className="eyebrow">Раздел {section.number} · Обзор</div><h1>{section.title}</h1>
+    <div className="reading-layout">
+      <article className="card article">
+        {loading && <p role="status">Загружаем обзор…</p>}
+        {error && <p role="alert" className="error">{error}</p>}
+        {!loading && !error && <Markdown text={text} path={section.overviewPath} />}
+      </article>
+      <aside className="card reading-aside" aria-label="Темы раздела">
+        <h2>Маршрут раздела</h2>
+        <p className="muted small">Изучай темы по порядку: теория, своя попытка, разбор.</p>
+        <Link className="button primary" to={`/topic/${section.topics[0].topic.id}`}>Начать первую тему →</Link>
+        {section.topics.map(({ topic, number }) => <Link className="task-link" key={topic.id} to={`/topic/${topic.id}`}>
+          <strong>{number} {topic.title}</strong>
+          <span className="small muted">{topic.tasks.length ? `Заданий: ${topic.tasks.length}` : 'Базовые концепции'}</span>
+        </Link>)}
+        <Link to="/">← Все темы</Link>
+      </aside>
+    </div>
+  </div>;
+}
+
+export function SectionPage() {
+  const { sectionId } = useParams();
+  const section = courseSections.find(entry => entry.id === sectionId);
+  return section ? <SectionView key={section.id} section={section} /> : <NotFound />;
 }
 
 function TopicView({ topic }: { topic: Topic }) {

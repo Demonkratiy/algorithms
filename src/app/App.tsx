@@ -1,6 +1,6 @@
 import { Component, useState, type ErrorInfo, type ReactNode } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
-import { CoursePage, NotFound, ReadPage, TopicPage } from '../pages/Learning';
+import { CoursePage, NotFound, ReadPage, SectionPage, TopicPage } from '../pages/Learning';
 import { PracticePage } from '../pages/Practice';
 import { SettingsPage } from '../pages/Settings';
 import { PreferencesProvider, usePreferences } from './preferences';
@@ -28,13 +28,16 @@ function Shell() {
     <main className="main">
       <header className="topbar">
         <div className="breadcrumb"><button className="icon-button" aria-label={collapsed ? 'Показать меню' : 'Скрыть меню'} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}>☰</button>
-          <Link to="/">Обучение</Link><span>/</span><span>{location.pathname === '/settings' ? 'Настройки' : current ? `${current.number} · ${current.topic.title}` : 'Твой маршрут'}</span></div>
+          <Link to="/">Обучение</Link><span>/</span>
+          {current?.topic && <><Link to={`/section/${current.section.id}`}>{current.section.number} · {current.section.title}</Link><span>/</span></>}
+          <span>{location.pathname === '/settings' ? 'Настройки' : current ? `${current.number} · ${current.topic?.title ?? current.section.title}` : 'Твой маршрут'}</span></div>
         <span className="badge">Первая версия · JavaScript</span>
       </header>
       {error && <div role="alert" className="error global-error">{error}</div>}
       <ErrorBoundary key={location.pathname}>
         <Routes>
           <Route path="/" element={<CoursePage />} />
+          <Route path="/section/:sectionId" element={<SectionPage />} />
           <Route path="/topic/:topicId" element={<TopicPage />} />
           <Route path="/task/:taskId" element={<PracticePage />} />
           <Route path="/read/*" element={<ReadPage />} />
