@@ -204,16 +204,16 @@ function bad(n, memo = new Map()) { ... }   // ✅ новый Map при каж�
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/05-recursion-trees/01-recursion/`](../practice/05-recursion-trees/01-recursion/).
+Практика по теме: [Recursion & Call Stack](../practice/05-recursion-trees/01-recursion/).
 
 **🔴 Основные (обязательно):**
-1. [`01-fibonacci-memo`](../practice/05-recursion-trees/01-recursion/01-fibonacci-memo.md) — база + мемоизация (разобрана выше — пиши по памяти).
-2. [`02-power-and-reverse`](../practice/05-recursion-trees/01-recursion/02-power-and-reverse.md) — Power; [Reverse String](../practice/05-recursion-trees/01-recursion/02-b-reverse-string.md) — отдельная разминка.
-3. [`03-subsets`](../practice/05-recursion-trees/01-recursion/03-subsets.md) — **backtracking**, ключевой шаблон перебора.
+1. [Fibonacci с мемоизацией](../practice/05-recursion-trees/01-recursion/01-fibonacci-memo.md) — база + мемоизация (разобрана выше — пиши по памяти).
+2. [Power — рекурсивное возведение в степень](../practice/05-recursion-trees/01-recursion/02-power-and-reverse.md) — Power; [Reverse String](../practice/05-recursion-trees/01-recursion/02-b-reverse-string.md) — отдельная разминка.
+3. [Subsets](../practice/05-recursion-trees/01-recursion/03-subsets.md) — **backtracking**, ключевой шаблон перебора.
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-permutations`](../practice/05-recursion-trees/01-recursion/04-permutations.md) — перестановки, backtracking с `used`.
-5. [`05-flatten-nested`](../practice/05-recursion-trees/01-recursion/05-flatten-nested.md) — разворот массива; отдельно [Count Comments](../practice/05-recursion-trees/01-recursion/05-b-count-comments.md) и [Deep Get](../practice/05-recursion-trees/01-recursion/05-c-deep-get.md).
+4. [Permutations](../practice/05-recursion-trees/01-recursion/04-permutations.md) — перестановки, backtracking с `used`.
+5. [Flatten Nested Array](../practice/05-recursion-trees/01-recursion/05-flatten-nested.md) — разворот массива; отдельно [Count Comments](../practice/05-recursion-trees/01-recursion/05-b-count-comments.md) и [Deep Get](../practice/05-recursion-trees/01-recursion/05-c-deep-get.md).
 
 ---
 

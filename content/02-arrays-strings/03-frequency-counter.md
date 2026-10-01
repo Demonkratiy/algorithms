@@ -132,10 +132,10 @@ for (const ch of s) counts[ch] = (counts[ch] || 0) + 1;
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/02-arrays-strings/03-frequency-counter/`](../practice/02-arrays-strings/03-frequency-counter/).
+Практика по теме: [Frequency Counter (Hash Map)](../practice/02-arrays-strings/03-frequency-counter/).
 
 **🔴 Основные (обязательно):**
-1. [`01-first-unique-char`](../practice/02-arrays-strings/03-frequency-counter/01-first-unique-char.md) — первый неповторяющийся символ. ← начни с неё
-2. [`02-valid-anagram`](../practice/02-arrays-strings/03-frequency-counter/02-valid-anagram.md) — счётчик `+`/`−` (разобран выше — пиши по памяти).
-3. [`03-group-anagrams`](../practice/02-arrays-strings/03-frequency-counter/03-group-anagrams.md) — `Map` + составной ключ.
-4. [`04-top-k-frequent`](../practice/02-arrays-strings/03-frequency-counter/04-top-k-frequent.md) — k самых частых элементов.
+1. [First Unique Character in a String](../practice/02-arrays-strings/03-frequency-counter/01-first-unique-char.md) — первый неповторяющийся символ. ← начни с неё
+2. [Valid Anagram](../practice/02-arrays-strings/03-frequency-counter/02-valid-anagram.md) — счётчик `+`/`−` (разобран выше — пиши по памяти).
+3. [Group Anagrams](../practice/02-arrays-strings/03-frequency-counter/03-group-anagrams.md) — `Map` + составной ключ.
+4. [Top K Frequent Elements](../practice/02-arrays-strings/03-frequency-counter/04-top-k-frequent.md) — k самых частых элементов.

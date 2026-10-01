@@ -203,17 +203,17 @@ function minFeasible(low, high, isFeasible) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/04-search-sort/01-binary-search/`](../practice/04-search-sort/01-binary-search/).
+Практика по теме: [Binary Search](../practice/04-search-sort/01-binary-search/).
 
 **🔴 Основные (обязательно):**
-1. [`01-binary-search`](../practice/04-search-sort/01-binary-search/01-binary-search.md) — классика (разобрана выше — пиши по памяти).
-2. [`02-search-insert-position`](../practice/04-search-sort/01-binary-search/02-search-insert-position.md) — переход к поиску **границы**.
-3. [`03-first-last-position`](../practice/04-search-sort/01-binary-search/03-first-last-position.md) — lower/upper bound, дубликаты.
-4. [`04-koko-eating-bananas`](../practice/04-search-sort/01-binary-search/04-koko-eating-bananas.md) — **бинарный поиск по ответу**.
+1. [Binary Search (классический)](../practice/04-search-sort/01-binary-search/01-binary-search.md) — классика (разобрана выше — пиши по памяти).
+2. [Search Insert Position](../practice/04-search-sort/01-binary-search/02-search-insert-position.md) — переход к поиску **границы**.
+3. [Find First and Last Position](../practice/04-search-sort/01-binary-search/03-first-last-position.md) — lower/upper bound, дубликаты.
+4. [Koko Eating Bananas](../practice/04-search-sort/01-binary-search/04-koko-eating-bananas.md) — **бинарный поиск по ответу**.
 
 **⚪ Дополнительные (если есть время):**
-5. [`05-search-rotated-array`](../practice/04-search-sort/01-binary-search/05-search-rotated-array.md) — сдвинутый отсортированный массив.
-6. [`06-sqrt`](../practice/04-search-sort/01-binary-search/06-sqrt.md) — целочисленный корень, поиск по ответу на числах.
+5. [Search in Rotated Sorted Array](../practice/04-search-sort/01-binary-search/05-search-rotated-array.md) — сдвинутый отсортированный массив.
+6. [Sqrt(x)](../practice/04-search-sort/01-binary-search/06-sqrt.md) — целочисленный корень, поиск по ответу на числах.
 
 ---
 

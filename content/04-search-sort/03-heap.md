@@ -187,15 +187,15 @@ class MinHeap {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/04-search-sort/03-heap/`](../practice/04-search-sort/03-heap/).
+Практика по теме: [Heap / Priority Queue](../practice/04-search-sort/03-heap/).
 
 **🔴 Основные (обязательно):**
-1. [`01-implement-min-heap`](../practice/04-search-sort/03-heap/01-implement-min-heap.md) — числовая куча с нуля (разобрана выше — пиши по памяти). Отдельно: [Comparator](../practice/04-search-sort/03-heap/01-b-heap-comparator.md) и [Heapify](../practice/04-search-sort/03-heap/01-c-heapify.md).
+1. [Реализовать Min-Heap](../practice/04-search-sort/03-heap/01-implement-min-heap.md) — числовая куча с нуля (разобрана выше — пиши по памяти). Отдельно: [Comparator](../practice/04-search-sort/03-heap/01-b-heap-comparator.md) и [Heapify](../practice/04-search-sort/03-heap/01-c-heapify.md).
 
 **⚪ Дополнительные (если есть время):**
-2. [`02-k-closest-points`](../practice/04-search-sort/03-heap/02-k-closest-points.md) — «k ближайших», три подхода на сравнение.
+2. [K Closest Points to Origin](../practice/04-search-sort/03-heap/02-k-closest-points.md) — «k ближайших», три подхода на сравнение.
 
-Дополнительно вернись к [`03-kth-largest`](../practice/04-search-sort/02-sorting/03-kth-largest.md)
+Дополнительно вернись к [Kth Largest Element in an Array](../practice/04-search-sort/02-sorting/03-kth-largest.md)
 из раздела сортировок и допиши heap-вариант — теперь ты умеешь.
 
 ---

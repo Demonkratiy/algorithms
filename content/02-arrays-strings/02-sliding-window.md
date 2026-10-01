@@ -168,12 +168,12 @@ function longestUnique(s) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/02-arrays-strings/02-sliding-window/`](../practice/02-arrays-strings/02-sliding-window/).
+Практика по теме: [Sliding Window](../practice/02-arrays-strings/02-sliding-window/).
 
 **🔴 Основные (обязательно):**
-1. [`01-min-subarray-sum`](../practice/02-arrays-strings/02-sliding-window/01-min-subarray-sum.md) — минимальный подмассив с суммой ≥ target (dynamic). ← начни с неё
-2. [`02-max-vowels`](../practice/02-arrays-strings/02-sliding-window/02-max-vowels.md) — окно фиксированной длины.
-3. [`03-longest-substring`](../practice/02-arrays-strings/02-sliding-window/03-longest-substring.md) — без повторов, окно + `Set`.
+1. [Minimum Size Subarray Sum](../practice/02-arrays-strings/02-sliding-window/01-min-subarray-sum.md) — минимальный подмассив с суммой ≥ target (dynamic). ← начни с неё
+2. [Maximum Number of Vowels in a Substring of Length K](../practice/02-arrays-strings/02-sliding-window/02-max-vowels.md) — окно фиксированной длины.
+3. [Longest Substring Without Repeating Characters](../practice/02-arrays-strings/02-sliding-window/03-longest-substring.md) — без повторов, окно + `Set`.
 
 **Для закрепления (без отдельных файлов):**
 - Maximum Sum Subarray of Size K — разобран выше, напиши по памяти.

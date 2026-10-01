@@ -105,7 +105,7 @@ input.addEventListener('input', (e) => search(e.target.value));
 - `immediate` / leading edge — выполнить **сразу**, а потом игнорировать `delay`;
 - возврат промиса с результатом.
 
-Всё это разобрано в задаче [`01-debounce`](../practice/08-js-interview/01-function-utils/01-debounce.md).
+Всё это разобрано в задаче [Debounce](../practice/08-js-interview/01-function-utils/01-debounce.md).
 
 ---
 
@@ -148,16 +148,16 @@ throttle: ✔     ✔     ✔     ✔    (равномерно, раз в N мс
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/08-js-interview/01-function-utils/`](../practice/08-js-interview/01-function-utils/).
+Практика по теме: [JS Function Utils](../practice/08-js-interview/01-function-utils/).
 
 **🔴 Основные (обязательно):**
-1. [`01-debounce`](../practice/08-js-interview/01-function-utils/01-debounce.md) — база + `cancel` + `immediate` (разобрана выше — пиши по памяти).
-2. [`02-throttle`](../practice/08-js-interview/01-function-utils/02-throttle.md) — только leading, два способа реализации.
-3. [`02-b-throttle-trailing`](../practice/08-js-interview/01-function-utils/02-b-throttle-trailing.md) — отдельная задача: leading + trailing, последние аргументы и новое окно после trailing.
+1. [Debounce](../practice/08-js-interview/01-function-utils/01-debounce.md) — база + `cancel` + `immediate` (разобрана выше — пиши по памяти).
+2. [Throttle](../practice/08-js-interview/01-function-utils/02-throttle.md) — только leading, два способа реализации.
+3. [Throttle — leading + trailing](../practice/08-js-interview/01-function-utils/02-b-throttle-trailing.md) — отдельная задача: leading + trailing, последние аргументы и новое окно после trailing.
 
 **⚪ Дополнительные (если есть время):**
-4. [`03-curry`](../practice/08-js-interview/01-function-utils/03-curry.md) — каррирование, `fn.length`.
-5. [`04-memoize`](../practice/08-js-interview/01-function-utils/04-memoize.md) — кеш вызовов, выбор ключа.
+4. [Curry](../practice/08-js-interview/01-function-utils/03-curry.md) — каррирование, `fn.length`.
+5. [Memoize](../practice/08-js-interview/01-function-utils/04-memoize.md) — кеш вызовов, выбор ключа.
 
 ---
 
@@ -188,6 +188,6 @@ throttle: ✔     ✔     ✔     ✔    (равномерно, раз в N мс
    `constructor` могут дать ложное попадание в кеш.
 6. Это режим **leading edge**: держать флаг «таймер не запущен» — если он не запущен, выполнить
    сразу и запустить таймер; последующие вызовы в течение `delay` игнорировать. Реализация — в
-   задаче [`01-debounce`](../practice/08-js-interview/01-function-utils/01-debounce.md).
+   задаче [Debounce](../practice/08-js-interview/01-function-utils/01-debounce.md).
 
 </details>

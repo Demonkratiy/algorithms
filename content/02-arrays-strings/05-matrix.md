@@ -194,15 +194,15 @@ function setZeroes(matrix) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/02-arrays-strings/05-matrix/`](../practice/02-arrays-strings/05-matrix/).
+Практика по теме: [Matrix / 2D Arrays](../practice/02-arrays-strings/05-matrix/).
 
 **⚪ Дополнительные (тема ниже по приоритету, чем остальные в разделе 02):**
-1. [`01-rotate-image`](../practice/02-arrays-strings/05-matrix/01-rotate-image.md) — поворот на 90° на месте.
-2. [`02-spiral-matrix`](../practice/02-arrays-strings/05-matrix/02-spiral-matrix.md) — обход по спирали, работа с границами.
-3. [`03-set-matrix-zeroes`](../practice/02-arrays-strings/05-matrix/03-set-matrix-zeroes.md) — разобрана выше, пиши по памяти.
+1. [Rotate Image](../practice/02-arrays-strings/05-matrix/01-rotate-image.md) — поворот на 90° на месте.
+2. [Spiral Matrix](../practice/02-arrays-strings/05-matrix/02-spiral-matrix.md) — обход по спирали, работа с границами.
+3. [Set Matrix Zeroes](../practice/02-arrays-strings/05-matrix/03-set-matrix-zeroes.md) — разобрана выше, пиши по памяти.
 
 > 💡 Задачи «обход сетки» (острова, кратчайший путь) живут в разделе
-> [06-graphs](../06-graphs/01-graph-traversal.md) — там матрица выступает как граф.
+> [Graph Traversal (BFS / DFS)](../06-graphs/01-graph-traversal.md) — там матрица выступает как граф.
 
 ---
 

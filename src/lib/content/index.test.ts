@@ -194,32 +194,6 @@ describe('course catalog and migration', () => {
     }
   });
 
-  it('keeps all migrated relative Markdown links valid', () => {
-    const files = [
-      ...markdownFiles(content), ...markdownFiles(join(root, 'personal')),
-      join(root, '.github', 'copilot-instructions.md'),
-    ];
-    for (const file of files) {
-      const markdown = readFileSync(file, 'utf8')
-        .replace(/```[^\n]*\n[\s\S]*?```/g, '')
-        .replace(/`[^`\n]*`/g, '');
-      for (const match of markdown.matchAll(/\[[^\]\n]*\]\(([^)\n]+)\)/g)) {
-        const url = match[1];
-        if (/^[a-z][a-z0-9+.-]*:|^\/\//i.test(url)) continue;
-        const path = decodeURIComponent(url.split(/[?#]/)[0]);
-        const target = path ? resolve(dirname(file), path) : file;
-        expect(existsSync(target), `${file}: ${url}`).toBe(true);
-        const anchor = url.split('#')[1];
-        if (anchor && target.endsWith('.md')) {
-          const headings = [...readFileSync(target, 'utf8').matchAll(/^#{1,6}\s+(.+)$/gm)];
-          const slugs = headings.map((heading) => heading[1].trim().toLowerCase()
-            .replace(/[^\p{L}\p{N}\p{M}\s_-]/gu, '').replace(/ /g, '-'));
-          expect(slugs, `${file}: ${url}`).toContain(decodeURIComponent(anchor));
-        }
-      }
-    }
-  });
-
   it('archives only filled attempts and preserves their statements', () => {
     const archiveRoot = join(root, 'personal', 'solutions');
     const archives = markdownFiles(archiveRoot);

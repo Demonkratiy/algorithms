@@ -2,7 +2,7 @@
 
 **Тема:** binary-trees (DFS-контракт) · **Сложность:** easy · **Приоритет:** 🔴 основная
 
-> ⚠️ Разобрана в теории ([binary-trees.md](../../../05-recursion-trees/02-binary-trees.md)).
+> ⚠️ Разобрана в теории ([Binary Trees (DFS / BFS)](../../../05-recursion-trees/02-binary-trees.md)).
 > Пиши **по памяти** обе версии (DFS и BFS). Это фундамент всех задач на деревья.
 
 Дополнительная самостоятельная задача: [Minimum Depth](01-b-min-depth.md).

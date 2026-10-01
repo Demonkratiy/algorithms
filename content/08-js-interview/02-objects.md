@@ -8,8 +8,8 @@
 Типичные формулировки: _«напишите deepClone»_, _«реализуйте EventEmitter»_, _«почему здесь Map,
 а не обычный объект?»_.
 
-> Асинхронность вынесена в отдельные темы: [03-event-loop.md](03-event-loop.md) (когда выполняется)
-> и [04-promises.md](04-promises.md) (как писать).
+> Асинхронность вынесена в отдельные темы: [Event Loop и асинхронность](03-event-loop.md) (когда выполняется)
+> и [JS: промисы на практике](04-promises.md) (как писать).
 
 ---
 
@@ -154,11 +154,11 @@ class EventEmitter {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/08-js-interview/02-objects/`](../practice/08-js-interview/02-objects/).
+Практика по теме: [JS: объекты и структуры](../practice/08-js-interview/02-objects/).
 
 **🔴 Основные (обязательно):**
-1. [`01-deep-clone`](../practice/08-js-interview/02-objects/01-deep-clone.md) — рекурсия по данным + циклические ссылки.
-2. [`02-event-emitter`](../practice/08-js-interview/02-objects/02-event-emitter.md) — дизайн структуры (разобрана выше — пиши по памяти).
+1. [Deep Clone](../practice/08-js-interview/02-objects/01-deep-clone.md) — рекурсия по данным + циклические ссылки.
+2. [EventEmitter](../practice/08-js-interview/02-objects/02-event-emitter.md) — дизайн структуры (разобрана выше — пиши по памяти).
 
 ---
 

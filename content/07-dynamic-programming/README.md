@@ -38,7 +38,7 @@ Greedy также не означает обязательный один про
 
 - [Recursion & Call Stack](../05-recursion-trees/01-recursion.md) — дерево вызовов, base case и запоминание результатов.
 - [Big O](../01-basics/01-big-o.md) — подсчёт состояний, переходов и хранилища.
-- [Array / Map / Set](../01-basics/02-data-structures.md) — таблицы и cache с корректными ключами.
+- [Структуры данных JS (Array / Object / Map / Set)](../01-basics/02-data-structures.md) — таблицы и cache с корректными ключами.
 - [Sorting](../04-search-sort/02-sorting.md) — подготовка порядка, который часто нужен для обсуждения Greedy.
 
 Для табличных состояний полезна тема [Matrix](../02-arrays-strings/05-matrix.md). Перед вычислениями договорись, как различать «не вычислено», «недостижимо» и корректный ответ `0`: это не одно состояние.

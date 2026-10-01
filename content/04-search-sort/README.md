@@ -33,7 +33,7 @@
 ## Что нужно знать заранее
 
 - [Big O](../01-basics/01-big-o.md) — чтобы учитывать подготовку, основной поиск и дополнительное хранилище.
-- [Array / Object / Map / Set](../01-basics/02-data-structures.md) — индексы, mutation и ссылочная модель.
+- [Структуры данных JS (Array / Object / Map / Set)](../01-basics/02-data-structures.md) — индексы, mutation и ссылочная модель.
 - [Two Pointers](../02-arrays-strings/01-two-pointers.md) — объяснение движения границ и использование sorted-входа.
 
 Для подробного разбора рекурсивных Merge Sort и Quick Sort пригодится [Recursion & Call Stack](../05-recursion-trees/01-recursion.md). Это точечная опора, а не требование сначала пройти весь раздел деревьев. Начать Binary Search и разобраться в назначении сортировки можно до неё.

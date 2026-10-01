@@ -190,16 +190,16 @@ function quickSort(arr) {
 
 ## 🏋️ Задачи для практики
 
-Файлы в [`practice/04-search-sort/02-sorting/`](../practice/04-search-sort/02-sorting/).
+Практика по теме: [Sorting](../practice/04-search-sort/02-sorting/).
 
 **🔴 Основные (обязательно):**
-1. [`01-sort-colors`](../practice/04-search-sort/02-sorting/01-sort-colors.md) — сортировка за `O(N)` без сравнений (Dutch flag, три указателя).
-2. [`02-merge-intervals`](../practice/04-search-sort/02-sorting/02-merge-intervals.md) — классика «сортировка как инструмент».
-3. [`03-kth-largest`](../practice/04-search-sort/02-sorting/03-kth-largest.md) — сортировка vs quickselect.
+1. [Sort Colors](../practice/04-search-sort/02-sorting/01-sort-colors.md) — сортировка за `O(N)` без сравнений (Dutch flag, три указателя).
+2. [Merge Intervals](../practice/04-search-sort/02-sorting/02-merge-intervals.md) — классика «сортировка как инструмент».
+3. [Kth Largest Element in an Array](../practice/04-search-sort/02-sorting/03-kth-largest.md) — сортировка vs quickselect.
 
 **⚪ Дополнительные (если есть время):**
-4. [`04-meeting-rooms`](../practice/04-search-sort/02-sorting/04-meeting-rooms.md) — Meeting Rooms I, проверка конфликтов; [Meeting Rooms II](../practice/04-search-sort/02-sorting/04-b-meeting-rooms-ii.md) — число переговорок.
-5. [`05-merge-sort-implementation`](../practice/04-search-sort/02-sorting/05-merge-sort-implementation.md) — написать merge sort с нуля.
+4. [Meeting Rooms I](../practice/04-search-sort/02-sorting/04-meeting-rooms.md) — Meeting Rooms I, проверка конфликтов; [Meeting Rooms II](../practice/04-search-sort/02-sorting/04-b-meeting-rooms-ii.md) — число переговорок.
+5. [Реализовать Merge Sort](../practice/04-search-sort/02-sorting/05-merge-sort-implementation.md) — написать merge sort с нуля.
 
 ---
 

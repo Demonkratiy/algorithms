@@ -2,7 +2,7 @@
 
 **Тема:** js-interview / function-utils · **Сложность:** medium · **Приоритет:** 🔴 основная
 
-> ⚠️ Разобрана в теории ([function-utils.md](../../../08-js-interview/01-function-utils.md)).
+> ⚠️ Разобрана в теории ([JS Function Utils](../../../08-js-interview/01-function-utils.md)).
 > Пиши **по памяти**. Самая частая «живая» задача на FE-секциях — её просят почти всегда.
 
 ## Условие

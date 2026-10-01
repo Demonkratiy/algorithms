@@ -118,7 +118,7 @@ function SectionView({ section }: { section: CourseSection }) {
         {error && <p role="alert" className="error">{error}</p>}
         {!loading && !error && <Markdown text={text} path={section.overviewPath} />}
       </article>
-      <aside className="card reading-aside" aria-label="Темы раздела">
+      <aside id="user-content-topics" className="card reading-aside" aria-label="Темы раздела">
         <h2>Маршрут раздела</h2>
         <p className="muted small">Изучай темы по порядку: теория, своя попытка, разбор.</p>
         <Link className="button primary" to={`/topic/${section.topics[0].topic.id}`}>Начать первую тему →</Link>
@@ -149,7 +149,7 @@ function TopicView({ topic }: { topic: Topic }) {
         {error && <p role="alert" className="error">{error}</p>}
         {!loading && !error && <Markdown text={text} path={topic.theoryPath} />}
       </article>
-      <aside className="card reading-aside">
+      <aside id="user-content-practice" className="card reading-aside">
         <h2>Закрепи на практике</h2>
         <p className="muted small">Сначала своя попытка, затем подсказки и разбор.</p>
         {topic.tasks.map(task => <Link className="task-link" key={task.id} to={`/task/${task.id}`}>
