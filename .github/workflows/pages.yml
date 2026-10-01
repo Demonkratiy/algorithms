@@ -37,9 +37,20 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Check production UI
+        id: browser-tests
         run: npm run test:e2e -- app.spec.ts welcome.spec.ts quiz.spec.ts
         env:
           ALGO_PREVIEW: '1'
+      - name: Save browser failure report
+        if: failure() && steps.browser-tests.outcome == 'failure'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: production-browser-failure
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
+          if-no-files-found: warn
       - name: Upload site
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4

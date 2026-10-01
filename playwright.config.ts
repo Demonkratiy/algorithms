@@ -2,7 +2,14 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  use: { baseURL: 'http://127.0.0.1:4173', headless: true },
+  forbidOnly: Boolean(process.env.CI),
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  use: {
+    baseURL: 'http://127.0.0.1:4173',
+    headless: true,
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
   workers: 1,
   webServer: {
     command: process.env.ALGO_PREVIEW === '1'

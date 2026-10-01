@@ -97,6 +97,15 @@ PR проходят install/unit/build/production UI smoke без публика
 добавляет upload/deploy после успешных проверок. Deployment использует окружение
 `github-pages` и минимальные `pages: write`/`id-token: write`; actions закреплены на SHA.
 Адрес — `https://demonkratiy.github.io/algorithms/`, base `./` сохраняется.
+`.github/workflows/regression.yml` запускает весь Playwright-набор на Vite по
+понедельникам в 03:17 UTC или вручную. Этот workflow не публикует сайт.
+CI использует GitHub/HTML reporters, forbidOnly, screenshot only-on-failure и
+trace retain-on-failure. Полный отчёт сохраняется после тестов, production smoke —
+при падении; artifacts хранятся 14 дней и содержат только отчёты/test-results.
+Dependabot еженедельно обновляет npm и SHA GitHub Actions через PR, без auto-merge.
+GitHub ruleset для `main` требует PR и актуальный успешный `build` от GitHub Actions,
+без обязательного approval; force-push/удаление запрещены. Ruleset управляется
+на стороне GitHub, а не создаётся самим workflow.
 Markdown загружается лениво только из `content/`; raw HTML проходит sanitization.
 Личные решения не импортируются в приложение.
 
