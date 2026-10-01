@@ -6,11 +6,27 @@ import { describe, expect, it } from 'vitest';
 import { topics } from '../../../content/course';
 import { getTaskDefinition, getQuizDefinition, taskDefinitions, quizDefinitions } from '../../../tasks';
 import { getMarkdown, splitTaskMarkdown } from './index';
+import { parseQuizMarkdown } from '../../features/quiz/content';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const content = join(root, 'content');
 const tasks = topics.flatMap((topic) => topic.tasks);
 const normalize = (text: string) => text.replace(/\r\n/g, '\n');
+
+function isCollapsedAt(source: string, position: number) {
+  let fence = '', depth = 0;
+  for (const line of source.slice(0, position).split('\n')) {
+    const marker = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (fence) {
+      if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length
+        && !line.slice(marker[0].length).trim()) fence = '';
+      continue;
+    }
+    if (marker) { fence = marker[1]; continue; }
+    for (const tag of line.matchAll(/<\/?details\b[^>]*>/gi)) depth += tag[0].startsWith('</') ? -1 : 1;
+  }
+  return depth > 0;
+}
 
 function markdownFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -202,22 +218,47 @@ describe('course catalog and migration', () => {
     }
   });
 
-  it('loads and splits every actual task without displaying attempts or gated content', async () => {
-    let references = 0;
+  it('requires hints and a gated reference implementation for every code task', async () => {
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
     for (const task of tasks) {
       const markdown = await getMarkdown(task.path);
       const result = splitTaskMarkdown(markdown);
-      expect(Boolean(result.solution), task.id).toBe(/^## 🔍 Разбор/m.test(markdown));
+      expect(result.solution.trim(), `${task.id}: missing analysis`).not.toBe('');
+      expect(result.solution, `${task.id}: analysis must be collapsed`).toMatch(/<details\b/);
       expect(result.statement, task.id).toContain('# ');
       expect(result.statement, task.id).not.toMatch(/^##.*(?:Моё решение|Мои ответы|Моя оценка|Подсказки|Разбор)/m);
       expect(result.hints, task.id).toHaveLength((markdown.match(/<summary>Подсказка/g) ?? []).length);
       for (const hint of result.hints) expect(result.statement).not.toContain(hint);
-      if (result.solution) {
-        references++;
-        expect(result.statement).not.toContain(result.solution);
+      expect(result.statement).not.toContain(result.solution);
+      const quiz = getQuizDefinition(task.id);
+      if (quiz) {
+        const questions = parseQuizMarkdown(markdown, quiz);
+        expect(questions, task.id).toHaveLength(quiz.questions.length);
+        for (const question of questions) expect(question.explanation.trim(), `${task.id}: ${question.id}`).not.toBe('');
+        continue;
       }
+      expect(result.hints.length, `${task.id}: missing hints`).toBeGreaterThan(0);
+      for (const hint of result.hints) {
+        expect(hint.replace(/^#{1,6}[^\n]*(?:\n|$)/gm, '').trim(), `${task.id}: empty hint`).not.toBe('');
+      }
+      const definition = getTaskDefinition(task.id);
+      expect(definition, `${task.id}: missing executable definition`).toBeDefined();
+      const entry = definition!.runner.entryPoint.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const declaration = new RegExp(`\\b(?:function\\s+${entry}\\b|class\\s+${entry}\\b|(?:const|let|var)\\s+${entry}\\s*=)`);
+      const matches = [...result.solution.matchAll(/```(?:js|javascript)\s*\n([\s\S]*?)\n```/g)];
+      for (const match of matches) expect(isCollapsedAt(result.solution, match.index), `${task.id}: code outside spoiler`).toBe(true);
+      const blocks = matches.map(match => match[1]);
+      const references = blocks.filter(code => declaration.test(code) && !/TODO|пиши здесь|ваш код/i.test(code));
+      expect(references.length, `${task.id}: missing reference code for ${definition!.runner.entryPoint}`).toBeGreaterThan(0);
+      const parseable = references.some(code => {
+        try { new Function(code); return true; }
+        catch {
+          try { new AsyncFunction(code); return true; }
+          catch { return false; }
+        }
+      });
+      expect(parseable, `${task.id}: no syntactically complete reference`).toBe(true);
     }
-    expect(references).toBe(91);
   });
 });
 
