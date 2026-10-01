@@ -1,13 +1,43 @@
 import { expect, test } from '@playwright/test';
 
+test('navigation hover uses accent color without underlining in both themes', async ({ page }) => {
+  await page.goto('/#/topic/two-pointers');
+  const nav = page.getByRole('navigation', { name: 'Разделы курса' });
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate(value => document.documentElement.dataset.theme = value, theme);
+    const accent = await nav.getByRole('link', { name: '2.1 Two Pointers', exact: true })
+      .evaluate(link => getComputedStyle(link).color);
+    for (const link of [
+      nav.getByRole('link', { name: 'Все темы', exact: true }),
+      nav.getByRole('link', { name: '6 Графы', exact: true }),
+      nav.getByRole('link', { name: '2.4 Prefix Sum (префиксные суммы)', exact: true }),
+      nav.getByRole('link', { name: /Move Zeroes/ }),
+      page.getByRole('link', { name: '⚙ Настройки', exact: true }),
+      page.locator('.breadcrumb').getByRole('link', { name: 'Обучение', exact: true }),
+    ]) {
+      await link.hover();
+      await expect(link).toHaveCSS('color', accent);
+      await expect(link).toHaveCSS('text-decoration-line', 'none');
+    }
+  }
+});
+
 test('course, theory and JS practice are available', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Учимся решать, а не запоминать' })).toBeVisible();
+  const catalog = page.getByRole('navigation', { name: 'Разделы курса' }).getByRole('link', { name: 'Все темы', exact: true });
+  await expect(catalog).toHaveText('Все темы');
+  await expect(catalog).toHaveAttribute('aria-current', 'page');
+  await expect(page.getByText('Твоё обучение', { exact: true })).toHaveCount(0);
   await page.locator('.topic-card').filter({ has: page.getByRole('heading', { name: 'JS Function Utils', exact: true }) }).click();
   await expect(page.locator('.article')).toContainText('JS Function Utils');
+  await expect(catalog).not.toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.task-link').filter({ hasText: 'Debounce' }).getByText('Кодинг', { exact: true })).toBeVisible();
   await page.locator('.task-link').filter({ hasText: 'Debounce' }).click();
   await expect(page.getByText('Проверка этой задачи ещё не подключена.', { exact: false })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Проверить решение' })).toBeVisible();
+  await expect(page.locator('.page-heading').getByText('Кодинг', { exact: true })).toBeVisible();
+  await expect(page.getByText('Проверка в браузере', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Разбор', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Показать разбор — я готов' })).toBeVisible();
 });

@@ -1,11 +1,12 @@
-import { Component, useState, type ErrorInfo, type ReactNode } from 'react';
+import { Component, useState, type CSSProperties, type ErrorInfo, type ReactNode } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import { CoursePage, NotFound, ReadPage, SectionPage, TopicPage } from '../pages/Learning';
 import { PracticePage } from '../pages/Practice';
 import { SettingsPage } from '../pages/Settings';
 import { PreferencesProvider, usePreferences } from './preferences';
 import { CourseSidebar } from '../components/CourseSidebar';
-import { findCourseLocation } from '../lib/content/navigation';
+import { SidebarResizer, useSidebarWidth } from '../components/SidebarResizer';
+import { findCourseLocation, getTaskNumber } from '../lib/content/navigation';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: string }> {
   state = { error: '' };
@@ -21,19 +22,27 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: string }
 function Shell() {
   const [collapsed, setCollapsed] = useState(false);
   const { error } = usePreferences();
+  const { width: sidebarWidth, error: sidebarError, resize: resizeSidebar } = useSidebarWidth();
   const location = useLocation();
   const current = findCourseLocation(location.pathname);
-  return <div className={`app-shell ${collapsed ? 'sidebar-hidden' : ''}`}>
+  const currentLabel = current?.task ? `${getTaskNumber(current.task.id)} · ${current.task.title}`
+    : current ? `${current.number} · ${current.topic?.title ?? current.section.title}`
+    : location.pathname === '/settings' ? 'Настройки' : 'Твой маршрут';
+  const sidebarStyle: CSSProperties & { '--sidebar-width': string } = { '--sidebar-width': `${sidebarWidth}px` };
+  return <div className={`app-shell ${collapsed ? 'sidebar-hidden' : ''}`} style={sidebarStyle}>
     <CourseSidebar visible={!collapsed} />
+    {!collapsed && <SidebarResizer width={sidebarWidth} onResize={resizeSidebar} />}
     <main className="main">
       <header className="topbar">
         <div className="breadcrumb"><button className="icon-button" aria-label={collapsed ? 'Показать меню' : 'Скрыть меню'} aria-expanded={!collapsed} onClick={() => setCollapsed(!collapsed)}>☰</button>
           <Link to="/">Обучение</Link><span>/</span>
           {current?.topic && <><Link to={`/section/${current.section.id}`}>{current.section.number} · {current.section.title}</Link><span>/</span></>}
-          <span>{location.pathname === '/settings' ? 'Настройки' : current ? `${current.number} · ${current.topic?.title ?? current.section.title}` : 'Твой маршрут'}</span></div>
+          {current?.task && <><Link to={`/topic/${current.topic.id}`}>{current.number} · {current.topic.title}</Link><span>/</span></>}
+          <span aria-current="page">{currentLabel}</span></div>
         <span className="badge">Первая версия · JavaScript</span>
       </header>
       {error && <div role="alert" className="error global-error">{error}</div>}
+      {sidebarError && <div role="alert" className="error global-error">{sidebarError}</div>}
       <ErrorBoundary key={location.pathname}>
         <Routes>
           <Route path="/" element={<CoursePage />} />

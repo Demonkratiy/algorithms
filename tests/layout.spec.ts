@@ -2,8 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 const panel = (page: Page, id: string) => page.locator(`[data-panel="${id}"]`);
 async function choose(page: Page, name: string) {
-  await page.getByLabel('Расположение панелей', { exact: true }).click();
-  await page.getByRole('button', { name, exact: true }).click();
+  await page.getByRole('group', { name: 'Расположение панелей', exact: true }).getByRole('button', { name, exact: true }).click();
 }
 async function size(page: Page, id: string) {
   const box = await panel(page, id).boundingBox();
@@ -15,6 +14,45 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/#/task/range-sum-query');
   await expect(page.locator('.panel-grid')).toHaveAttribute('data-loaded', 'true');
   await expect(page.locator('.monaco-editor')).toBeVisible();
+});
+
+test('layout icons are direct buttons with hover and keyboard tooltips', async ({ page }) => {
+  const picker = page.getByRole('group', { name: 'Расположение панелей', exact: true });
+  await expect(picker.getByRole('button')).toHaveCount(4);
+  await expect(picker.locator('button svg')).toHaveCount(4);
+  const columns = picker.getByRole('button', { name: 'Колонки', exact: true });
+  await expect(columns).toHaveAttribute('aria-pressed', 'true');
+  await expect(picker.getByRole('tooltip')).toHaveCount(0);
+  await columns.hover();
+  await expect(picker.getByRole('tooltip')).toHaveText('Колонки — Условие слева, редактор и результаты справа');
+  await picker.getByRole('tooltip').hover();
+  await expect(picker.getByRole('tooltip')).toBeVisible();
+  await page.mouse.move(0, 0);
+  await expect(picker.getByRole('tooltip')).toHaveCount(0);
+  await columns.focus();
+  await expect(picker.getByRole('tooltip')).toBeVisible();
+  await columns.press('Escape');
+  await expect(picker.getByRole('tooltip')).toHaveCount(0);
+  await columns.press('Tab');
+  const bottom = picker.getByRole('button', { name: 'Результаты снизу', exact: true });
+  await expect(bottom).toBeFocused();
+  await expect(picker.getByRole('tooltip')).toContainText('Условие и редактор сверху');
+  await bottom.press('Enter');
+  await expect(bottom).toHaveAttribute('aria-pressed', 'true');
+  await expect(columns).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.locator('.panel-grid')).toHaveAttribute('data-preset', 'bottom');
+  await bottom.press('Tab');
+  const stacked = picker.getByRole('button', { name: 'Вертикально', exact: true });
+  await expect(stacked).toBeFocused();
+  await stacked.press('Space');
+  await expect(page.locator('.panel-grid')).toHaveAttribute('data-preset', 'stacked');
+  await stacked.press('Tab');
+  const reset = picker.getByRole('button', { name: 'Сбросить расположение', exact: true });
+  await expect(reset).toBeFocused();
+  await expect(picker.getByRole('tooltip')).toContainText('не меняя код');
+  await reset.press('Enter');
+  await expect(columns).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.panel-grid')).toHaveAttribute('data-preset', 'columns');
 });
 
 test('three presets position panels, persist globally and reset', async ({ page }) => {
@@ -41,6 +79,11 @@ test('three presets position panels, persist globally and reset', async ({ page 
 });
 
 test('drag and keyboard resizing respect minimums and survive reload', async ({ page }) => {
+  await expect(page.getByText('Потяни за границу, чтобы изменить размер', { exact: true })).toHaveCount(0);
+  const toolbar = await page.locator('.layout-toolbar').boundingBox();
+  const picker = await page.locator('.layout-picker').boundingBox();
+  if (!toolbar || !picker) throw new Error('Layout toolbar missing');
+  expect(picker.x + picker.width).toBeCloseTo(toolbar.x + toolbar.width, 0);
   const before = await size(page, 'statement');
   const separator = page.getByRole('separator', { name: 'Ширина колонок' });
   const box = await separator.boundingBox();
@@ -114,11 +157,105 @@ test('row resizing is independent for bottom and stacked presets', async ({ page
   await choose(page, 'Вертикально');
   const initialStatement = await size(page, 'statement');
   const initialResult = await size(page, 'results');
-  await page.getByRole('separator', { name: 'Высота условия и редактора' }).press('Shift+ArrowDown');
+  await page.getByRole('separator', { name: 'Высота условия', exact: true }).press('Shift+ArrowDown');
   expect((await size(page, 'statement')).height).toBeCloseTo(initialStatement.height + 40, 0);
   expect((await size(page, 'results')).height).toBeCloseTo(initialResult.height, 0);
   await choose(page, 'Результаты снизу');
   expect((await size(page, 'editor')).height).toBeCloseTo(resizedBottom.height, 0);
+});
+
+test('stacked heights push all lower panels and notes without shrinking any neighbour', async ({ page }) => {
+  await choose(page, 'Вертикально');
+  const ids = ['statement', 'editor', 'results'];
+  const labels = ['Высота условия', 'Высота редактора', 'Высота результатов'];
+  const positions = () => page.locator('.workspace-panel, .practice-notes').evaluateAll(elements =>
+    elements.map(element => ({ top: element.getBoundingClientRect().top + scrollY, height: element.getBoundingClientRect().height })));
+  for (let index = 0; index < ids.length; index++) {
+    const before = await positions();
+    const gridHeight = await page.locator('.panel-grid').evaluate(element => element.getBoundingClientRect().height);
+    const handle = page.getByRole('separator', { name: labels[index], exact: true });
+    await handle.press('Shift+ArrowDown');
+    const after = await positions();
+    for (let other = 0; other < after.length; other++) {
+      expect(after[other].height).toBeCloseTo(before[other].height + (other === index ? 40 : 0), 0);
+      expect(after[other].top).toBeCloseTo(before[other].top + (other > index ? 40 : 0), 0);
+    }
+    expect(await page.locator('.panel-grid').evaluate(element => element.getBoundingClientRect().height)).toBeCloseTo(gridHeight + 40, 0);
+    await expect(handle).toHaveAttribute('aria-valuetext', `${Math.round(after[index].height)} пикселей`);
+  }
+  const heights = await Promise.all(ids.map(id => size(page, id).then(box => box.height)));
+  await page.reload();
+  await expect(page.locator('.panel-grid')).toHaveAttribute('data-loaded', 'true');
+  expect(await Promise.all(ids.map(id => size(page, id).then(box => box.height)))).toEqual(heights);
+  await page.getByRole('separator', { name: 'Высота редактора', exact: true }).press('Home');
+  expect((await size(page, 'editor')).height).toBe(220);
+  expect((await size(page, 'statement')).height).toBe(heights[0]);
+  expect((await size(page, 'results')).height).toBe(heights[2]);
+});
+
+test('stacked dragging accounts for page scroll and grows beyond the window height', async ({ page }) => {
+  await choose(page, 'Вертикально');
+  const handle = page.getByRole('separator', { name: 'Высота условия', exact: true });
+  await handle.scrollIntoViewIfNeeded();
+  const box = await handle.boundingBox();
+  if (!box) throw new Error('Stacked separator missing');
+  const before = await size(page, 'statement');
+  const editorHeight = (await size(page, 'editor')).height;
+  const resultsHeight = (await size(page, 'results')).height;
+  const startScroll = await page.evaluate(() => scrollY);
+  const x = box.x + box.width / 2, y = box.y + box.height / 2;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + 40, { steps: 4 });
+  await page.evaluate(() => window.scrollBy(0, 500));
+  const scrolled = await page.evaluate(() => scrollY);
+  expect(scrolled).toBeGreaterThan(startScroll);
+  await page.mouse.move(x, y + 80, { steps: 4 });
+  await page.mouse.up();
+  const after = await size(page, 'statement');
+  expect(after.height).toBeCloseTo(before.height + 80 + scrolled - startScroll, 0);
+  expect(after.height).toBeGreaterThan(await page.evaluate(() => innerHeight));
+  expect((await size(page, 'editor')).height).toBe(editorHeight);
+  expect((await size(page, 'results')).height).toBe(resultsHeight);
+});
+
+test('stacked resizing remains independent beside a collapsed panel and after maximizing', async ({ page }) => {
+  await choose(page, 'Вертикально');
+  const original = await size(page, 'statement');
+  await page.getByRole('button', { name: 'Свернуть: Редактор', exact: true }).click();
+  const handle = page.getByRole('separator', { name: 'Высота условия', exact: true });
+  await expect(handle).toHaveAttribute('aria-disabled', 'false');
+  await handle.press('Shift+ArrowDown');
+  expect((await size(page, 'statement')).height).toBe(original.height + 40);
+  expect((await size(page, 'editor')).height).toBe(44);
+  await page.getByRole('button', { name: 'Развернуть: Условие', exact: true }).click();
+  await expect(handle).toBeHidden();
+  await page.getByRole('button', { name: 'Вернуть расположение', exact: true }).click();
+  expect((await size(page, 'statement')).height).toBe(original.height + 40);
+  expect((await size(page, 'editor')).height).toBe(44);
+  await page.getByRole('button', { name: 'Восстановить: Редактор', exact: true }).click();
+  expect((await size(page, 'editor')).height).toBe(450);
+});
+
+test('legacy percentage layout is migrated without discarding its preset or collapsed panels', async ({ page }) => {
+  await page.evaluate(() => localStorage.setItem('algo-workspace-v1', JSON.stringify({
+    version: 1, preset: 'stacked',
+    sizes: { columns: [35, 60], bottom: [45, 70], stacked: [20, 50, 30] },
+    collapsed: ['results'],
+  })));
+  await page.reload();
+  await expect(page.locator('.panel-grid')).toHaveAttribute('data-preset', 'stacked');
+  await expect(page.locator('.workspace-panels > [role="alert"]')).toHaveCount(0);
+  expect((await size(page, 'results')).height).toBe(44);
+  const before = (await size(page, 'editor')).height;
+  await page.getByRole('separator', { name: 'Высота редактора', exact: true }).press('ArrowDown');
+  expect((await size(page, 'editor')).height).toBe(before + 10);
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('algo-workspace-v1')!));
+  expect(saved.version).toBe(2);
+  expect(saved.sizes.columns).toEqual([35, 60]);
+  expect(saved.sizes.bottom).toEqual([45, 70]);
+  expect(saved.collapsed).toEqual(['results']);
+  expect(saved.sizes.stacked[1]).toBe(before + 10);
 });
 
 for (const preset of ['Колонки', 'Результаты снизу', 'Вертикально']) {
@@ -140,6 +277,10 @@ test('narrow screen uses vertical panels without overwriting desktop preference'
   await choose(page, 'Результаты снизу');
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('.panel-grid')).toHaveAttribute('data-preset', 'stacked');
+  const saved = page.getByRole('button', { name: 'Результаты снизу', exact: true });
+  await expect(saved).toHaveAttribute('aria-pressed', 'true');
+  await saved.focus();
+  await expect(page.getByRole('tooltip')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.setViewportSize({ width: 1280, height: 720 });
   await expect(page.locator('.panel-grid')).toHaveAttribute('data-preset', 'bottom');

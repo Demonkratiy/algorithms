@@ -140,7 +140,6 @@ test('assessment follows the editor before checking in every layout, including a
   await openAssessment(page);
   await select(page, 'Подготовка — время', 'O(N)');
   for (const preset of ['Колонки', 'Результаты снизу', 'Вертикально']) {
-    await page.getByLabel('Расположение панелей', { exact: true }).click();
     await page.getByRole('button', { name: preset, exact: true }).click();
     await expect(page.locator('[data-panel="editor"] .complexity-assessment')).toHaveCount(1);
     await expect(page.locator('.practice-notes .complexity-assessment')).toHaveCount(0);
@@ -156,7 +155,6 @@ test('assessment follows the editor before checking in every layout, including a
     await expect(page.getByRole('group', { name: 'Подготовка — время', exact: true }).getByRole('radio', { name: 'O(N)', exact: true })).toBeChecked();
     await page.getByRole('button', { name: 'Вернуть расположение', exact: true }).click();
   }
-  await page.getByLabel('Расположение панелей', { exact: true }).click();
   await page.getByRole('button', { name: 'Колонки', exact: true }).click();
   await page.getByRole('separator', { name: 'Высота редактора и результатов' }).press('Home');
   expect((await page.locator('.editor-canvas').boundingBox())?.height).toBeGreaterThanOrEqual(180);

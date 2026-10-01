@@ -72,7 +72,7 @@ function TopicView({ topic }: { topic: Topic }) {
         {topic.tasks.map(task => <Link className="task-link" key={task.id} to={`/task/${task.id}`}>
           <strong><span className="task-index">{getTaskNumber(task.id)}</span> {task.title}</strong>
           <span className="badges"><TaskPriorityBadge priority={task.priority} />
-            <span className={`badge ${task.runnable ? 'green' : ''}`}>{task.activity === 'quiz' ? 'Мини-тест' : task.runnable ? 'Проверка в браузере' : 'Материал'}</span>
+            <span className={`badge ${task.runnable ? 'green' : ''}`}>{task.activity === 'quiz' ? 'Мини-тест' : task.runnable ? 'Кодинг' : 'Материал'}</span>
           </span>
         </Link>)}
         {!topic.tasks.length && <p className="muted">Мини-опрос находится в конце заметки.</p>}

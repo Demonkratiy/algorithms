@@ -1,5 +1,58 @@
 import { expect, test } from '@playwright/test';
 
+for (const [id, taskLabel, topicId, topicLabel, sectionId, sectionLabel] of [
+  ['rotting-oranges', '6.1.2 · Rotting Oranges', 'graph-traversal', '6.1 · Graph Traversal (BFS / DFS)', '06-graphs', '6 · Графы'],
+  ['lowest-common-ancestor-binary-tree', '5.2.8 · Lowest Common Ancestor — Binary Tree', 'binary-trees', '5.2 · Binary Trees (DFS / BFS)', '05-recursion-trees', '5 · Рекурсия и деревья'],
+  ['output-order', '8.3.1 · «Что выведется?» — порядок выполнения', 'event-loop', '8.3 · Event Loop и асинхронность', '08-js-interview', '8 · JS Interview'],
+]) {
+  test(`breadcrumbs show the full task path for ${id} and link to its ancestors`, async ({ page }) => {
+    await page.goto(`/#/task/${id}`);
+    const breadcrumb = page.locator('.breadcrumb');
+    await expect(breadcrumb.getByRole('link')).toHaveText(['Обучение', sectionLabel, topicLabel]);
+    await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText(taskLabel);
+    await expect(breadcrumb.getByRole('link', { name: taskLabel, exact: true })).toHaveCount(0);
+    await page.reload();
+    await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText(taskLabel);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(breadcrumb.locator('[aria-current="page"]')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    await breadcrumb.getByRole('link', { name: topicLabel, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`#/topic/${topicId}$`));
+    await expect(breadcrumb.getByRole('link')).toHaveText(['Обучение', sectionLabel]);
+    await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText(topicLabel);
+    await breadcrumb.getByRole('link', { name: sectionLabel, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`#/section/${sectionId}$`));
+    await expect(breadcrumb.getByRole('link')).toHaveText(['Обучение']);
+    await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText(sectionLabel);
+  });
+}
+
+test('all topics closes the accordion including repeated clicks and browser history', async ({ page }) => {
+  await page.goto('/#/task/move-zeroes');
+  const nav = page.getByRole('navigation', { name: 'Разделы курса' });
+  const catalog = nav.getByRole('link', { name: 'Все темы', exact: true });
+  await catalog.click();
+  await expect(catalog).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('.section-toggle[aria-expanded="true"]')).toHaveCount(0);
+  await expect(nav.locator('.topic-toggle[aria-expanded="true"]')).toHaveCount(0);
+  await nav.getByRole('button', { name: /раздел 2:/ }).click();
+  await nav.getByRole('button', { name: /тему 2\.1:/ }).click();
+  await catalog.focus(); await catalog.press('Enter');
+  await expect(nav.locator('.section-toggle[aria-expanded="true"]')).toHaveCount(0);
+  await expect(nav.locator('.topic-toggle[aria-expanded="true"]')).toHaveCount(0);
+  await page.goBack();
+  await expect(nav.getByRole('link', { name: /Move Zeroes/ })).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('.section-toggle[aria-expanded="true"]')).toHaveCount(1);
+  await expect(nav.locator('.topic-toggle[aria-expanded="true"]')).toHaveCount(1);
+  await page.goForward();
+  await expect(catalog).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('.section-toggle[aria-expanded="true"]')).toHaveCount(0);
+  await expect(nav.locator('.topic-toggle[aria-expanded="true"]')).toHaveCount(0);
+  await page.reload();
+  await expect(catalog).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('.section-toggle[aria-expanded="true"]')).toHaveCount(0);
+});
+
 const sections = [
   ['01-basics', 'Основы', 'big-o', 2],
   ['02-arrays-strings', 'Массивы и строки', 'two-pointers', 5],

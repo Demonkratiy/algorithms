@@ -28,9 +28,15 @@ describe('course navigation hierarchy', () => {
     for (const topic of topics) {
       const location = findCourseLocation(`/topic/${topic.id}`);
       expect(location?.topic).toBe(topic);
-      for (const task of topic.tasks) expect(findCourseLocation(`/task/${task.id}`)?.topic).toBe(topic);
+      expect(location?.task).toBeUndefined();
+      for (const task of topic.tasks) {
+        const taskLocation = findCourseLocation(`/task/${task.id}`);
+        expect(taskLocation?.topic).toBe(topic);
+        expect(taskLocation?.task).toBe(task);
+      }
     }
     expect(findCourseLocation('/topic/prefix-sum-extra')).toBeUndefined();
+    expect(findCourseLocation('/task/rotting-oranges-extra')).toBeUndefined();
     expect(findCourseLocation('/settings')).toBeUndefined();
   });
   it('reports inconsistent section metadata rather than guessing a number', () => {
@@ -41,7 +47,7 @@ describe('course navigation hierarchy', () => {
   it('resolves section overviews without assigning them topic or task numbers', () => {
     for (const section of courseSections) {
       expect(section.overviewPath).toBe(`${section.id}/README.md`);
-      expect(findCourseLocation(`/section/${section.id}`)).toEqual({ section, number: section.number, topic: undefined });
+      expect(findCourseLocation(`/section/${section.id}`)).toEqual({ section, number: section.number, topic: undefined, task: undefined });
     }
     expect(findCourseLocation('/section/06-graphs-extra')).toBeUndefined();
     expect(findCourseLocation('/section/missing')).toBeUndefined();

@@ -8,7 +8,7 @@ export function CourseSidebar({ visible }: { visible: boolean }) {
   const current = findCourseLocation(pathname);
   const sectionId = current?.section.id;
   const topicId = current?.topic?.id;
-  const [openSection, setOpenSection] = useState<string | null>(sectionId ?? courseSections[0].id);
+  const [openSection, setOpenSection] = useState<string | null>(sectionId ?? null);
   const [openTopic, setOpenTopic] = useState<string | null>(topicId ?? null);
   const navigation = useRef<HTMLElement>(null);
   const revealCurrent = useRef(true);
@@ -17,6 +17,9 @@ export function CourseSidebar({ visible }: { visible: boolean }) {
     if (sectionId) {
       setOpenSection(sectionId);
       setOpenTopic(topicId ?? null);
+    } else if (pathname === '/') {
+      setOpenSection(null);
+      setOpenTopic(null);
     }
   }, [pathname, sectionId, topicId]);
   useEffect(() => {
@@ -32,11 +35,15 @@ export function CourseSidebar({ visible }: { visible: boolean }) {
     revealCurrent.current = false;
   }, [pathname, sectionId, topicId, openSection, openTopic, visible]);
 
-  return <aside className="sidebar" aria-label="Навигация по курсу">
+  return <aside id="course-sidebar" className="sidebar" aria-label="Навигация по курсу">
     <Link className="logo" to="/"><span className="logo-mark">&lt;/&gt;</span>algo<span className="logo-dot">.</span></Link>
     <nav ref={navigation} className="sidebar-course" aria-label="Разделы курса">
-      <span className="eyebrow">Твоё обучение</span>
-      <NavLink className="nav-link" to="/" end>▤ Все темы</NavLink>
+      <NavLink className="nav-link catalog-nav" to="/" end onClick={event => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        if (pathname === '/') event.preventDefault();
+        setOpenSection(null);
+        setOpenTopic(null);
+      }}>Все темы</NavLink>
       <ul className="nav-groups">
         {courseSections.map(section => {
           const expanded = openSection === section.id;

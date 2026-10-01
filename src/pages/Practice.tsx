@@ -125,7 +125,7 @@ function Workspace({ task, topic, definition }: { task: CourseTask; topic: Topic
   return <div className="workspace">
     <div className="page-heading">
       <div><div className="eyebrow">Задача {getTaskNumber(task.id)} · {topic.title}</div><h1>{task.title}</h1>
-        <div className="badges"><TaskPriorityBadge priority={task.priority} /><span className="badge green">Проверка в браузере</span>{record.solved && <span className="badge green">Есть успешная проверка</span>}</div></div>
+        <div className="badges"><TaskPriorityBadge priority={task.priority} /><span className="badge green">Кодинг</span>{record.solved && <span className="badge green">Есть успешная проверка</span>}</div></div>
       <span className="small muted">Код не отправляется на сервер</span>
     </div>
     {previousTaskId && <div className="notice small">

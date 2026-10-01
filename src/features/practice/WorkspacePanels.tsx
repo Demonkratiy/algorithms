@@ -1,11 +1,36 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from 'react';
-import { defaultLayout, layoutKey, panelIds, parseLayout, resizePair, type PanelId, type Preset, type WorkspaceLayout } from './workspaceLayout';
+import { defaultLayout, layoutKey, panelIds, parseLayout, resizePair, resizePanelHeight, stackedMinimum, type PanelId, type Preset, type WorkspaceLayout } from './workspaceLayout';
 
 const names: Record<PanelId, string> = { statement: 'Условие', editor: 'Редактор', results: 'Результаты' };
-const presets: { id: Preset; title: string }[] = [
-  { id: 'columns', title: 'Колонки' }, { id: 'bottom', title: 'Результаты снизу' }, { id: 'stacked', title: 'Вертикально' },
+const presets: { id: Preset; title: string; description: string }[] = [
+  { id: 'columns', title: 'Колонки', description: 'Условие слева, редактор и результаты справа' },
+  { id: 'bottom', title: 'Результаты снизу', description: 'Условие и редактор сверху, результаты на всю ширину снизу' },
+  { id: 'stacked', title: 'Вертикально', description: 'Условие, редактор и результаты друг под другом' },
 ];
-type Split = { axis: 'x' | 'y'; first: PanelId; second: PanelId; index: 0 | 1; area: string; disabled: boolean; label: string };
+type Split = { axis: 'x' | 'y'; first: PanelId; area: string; disabled: boolean; label: string } & (
+  { second: PanelId; index: 0 | 1 } | { second?: undefined; index: 0 | 1 | 2 }
+);
+
+function LayoutButton({ label, description, pressed, onClick, children }: {
+  label: string; description: string; pressed?: boolean; onClick: () => void; children: ReactNode;
+}) {
+  const tooltipId = useId();
+  const [dismissed, setDismissed] = useState(false);
+  return <span className="layout-control" data-tooltip-dismissed={dismissed}
+    onMouseEnter={() => setDismissed(false)} onFocus={() => setDismissed(false)}
+    onKeyDown={event => { if (event.key === 'Escape') setDismissed(true); }}>
+    <button className="layout-icon-button" aria-label={label} aria-describedby={tooltipId}
+      aria-pressed={pressed} onClick={onClick}>{children}</button>
+    <span className="layout-tooltip" id={tooltipId} role="tooltip">{label} — {description}</span>
+  </span>;
+}
+
+function LayoutIcon({ preset }: { preset: Preset }) {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d={preset === 'columns' ? 'M11 4v16M11 12h10' : preset === 'bottom' ? 'M3 14h18M12 4v10' : 'M3 9h18M3 15h18'} />
+  </svg>;
+}
 
 export function WorkspacePanels({ statement, editor, results }: Record<PanelId, ReactNode>) {
   const [layout, setLayout] = useState(defaultLayout);
@@ -14,12 +39,11 @@ export function WorkspacePanels({ statement, editor, results }: Record<PanelId, 
   const [maximized, setMaximized] = useState<PanelId | null>(null);
   const [narrow, setNarrow] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const menu = useRef<HTMLDetailsElement>(null);
   const instanceId = useId();
   useEffect(() => {
     try {
       const saved = localStorage.getItem(layoutKey);
-      if (saved) setLayout(parseLayout(saved));
+      if (saved) setLayout(parseLayout(saved, root.current ? root.current.clientHeight - 16 : undefined));
     } catch (e) { setError(`Не удалось восстановить расположение: ${String(e)}`); }
     setLoaded(true);
     const element = root.current;
@@ -68,25 +92,24 @@ export function WorkspacePanels({ statement, editor, results }: Record<PanelId, 
       { axis: 'y', first: 'editor', second: 'results', index: 1, area: '2 / 1 / 3 / 4', disabled: bothTop || collapsed('results'), label: 'Высота верхних панелей и результатов' },
     ];
   } else {
-    style = { gridTemplateColumns: 'minmax(0, 1fr)', gridTemplateRows: panelIds.map((id, i) => track(layout.sizes.stacked[i], id === 'editor' ? 220 : 140, collapsed(id))).join(' 8px ') };
+    style = { gridTemplateColumns: 'minmax(0, 1fr)', gridTemplateRows: panelIds.map((id, i) => `${collapsed(id) ? 44 : layout.sizes.stacked[i]}px 8px`).join(' ') };
     areas = { statement: '1 / 1 / 2 / 2', editor: '3 / 1 / 4 / 2', results: '5 / 1 / 6 / 2' };
     splits = [
-      { axis: 'y', first: 'statement', second: 'editor', index: 0, area: '2 / 1 / 3 / 2', disabled: collapsed('statement') || collapsed('editor'), label: 'Высота условия и редактора' },
-      { axis: 'y', first: 'editor', second: 'results', index: 1, area: '4 / 1 / 5 / 2', disabled: collapsed('editor') || collapsed('results'), label: 'Высота редактора и результатов' },
+      { axis: 'y', first: 'statement', index: 0, area: '2 / 1 / 3 / 2', disabled: collapsed('statement'), label: 'Высота условия' },
+      { axis: 'y', first: 'editor', index: 1, area: '4 / 1 / 5 / 2', disabled: collapsed('editor'), label: 'Высота редактора' },
+      { axis: 'y', first: 'results', index: 2, area: '6 / 1 / 7 / 2', disabled: collapsed('results'), label: 'Высота результатов' },
     ];
   }
   function resize(split: Split, first: number, second: number, delta: number, initial: WorkspaceLayout) {
-    const minFirst = split.axis === 'x' ? 280 : split.first === 'editor' || preset === 'bottom' ? 220 : 140;
-    const minSecond = split.axis === 'x' ? 280 : split.second === 'editor' ? 220 : preset === 'stacked' ? 140 : 120;
-    const fraction = resizePair(first, second, delta, minFirst, minSecond);
     const sizes = { ...initial.sizes };
-    if (preset === 'stacked') {
-      const pair = sizes.stacked[split.index] + sizes.stacked[split.index + 1];
+    if (!split.second) {
       const next: [number, number, number] = [...sizes.stacked];
-      next[split.index] = pair * fraction;
-      next[split.index + 1] = pair * (1 - fraction);
+      next[split.index] = resizePanelHeight(first, delta, split.first);
       sizes.stacked = next;
-    } else {
+    } else if (preset !== 'stacked') {
+      const minFirst = split.axis === 'x' ? 280 : split.first === 'editor' || preset === 'bottom' ? 220 : 140;
+      const minSecond = split.axis === 'x' ? 280 : split.second === 'editor' ? 220 : 120;
+      const fraction = resizePair(first, second, delta, minFirst, minSecond);
       const next: [number, number] = [...sizes[preset]];
       next[split.index] = fraction * 100;
       sizes[preset] = next;
@@ -96,20 +119,20 @@ export function WorkspacePanels({ statement, editor, results }: Record<PanelId, 
   const children = { statement, editor, results };
   return <div className="workspace-panels">
     <div className="layout-toolbar">
-      <span className="small muted">{narrow ? 'На узком экране панели расположены вертикально' : 'Потяни за границу, чтобы изменить размер'}</span>
-      <details className="layout-picker" ref={menu} onKeyDown={event => {
-        if (event.key === 'Escape' && menu.current) { menu.current.open = false; menu.current.querySelector('summary')?.focus(); }
-      }}>
-        <summary title="Расположение панелей" aria-label="Расположение панелей">▦ <span>Расположение</span></summary>
-        <div className="layout-options" aria-label="Схемы расположения">
-          {presets.map(item => <button key={item.id} className="layout-option" aria-pressed={layout.preset === item.id} onClick={() => {
-            change({ ...layout, preset: item.id }); setMaximized(null); if (menu.current) menu.current.open = false;
-          }}><span className={`layout-mini ${item.id}`} aria-hidden="true"><i /><i /><i /></span>{item.title}</button>)}
-          <button className="button" onClick={() => {
-            change(defaultLayout()); setMaximized(null); if (menu.current) menu.current.open = false;
-          }}>Сбросить расположение</button>
-        </div>
-      </details>
+      {narrow && <span className="small muted">На узком экране панели расположены вертикально</span>}
+      <div className="layout-picker" role="group" aria-label="Расположение панелей">
+        {presets.map(item => <LayoutButton key={item.id} label={item.title} description={item.description}
+          pressed={layout.preset === item.id} onClick={() => {
+            change({ ...layout, preset: item.id }); setMaximized(null);
+          }}><LayoutIcon preset={item.id} /></LayoutButton>)}
+        <span className="layout-control-divider" aria-hidden="true" />
+        <LayoutButton label="Сбросить расположение" description="Вернуть исходную схему, размеры и раскрыть панели, не меняя код"
+          onClick={() => { change(defaultLayout()); setMaximized(null); }}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6" />
+          </svg>
+        </LayoutButton>
+      </div>
     </div>
     {error && <div role="alert" className="error">{error}</div>}
     <div ref={root} className={`panel-grid ${maximized ? 'has-maximized' : ''}`} data-preset={preset} data-loaded={loaded} style={maximized ? { gridTemplateColumns: '1fr', gridTemplateRows: '1fr' } : style}>
@@ -136,8 +159,8 @@ export function WorkspacePanels({ statement, editor, results }: Record<PanelId, 
           <div id={`${instanceId}-${id}-body`} className="panel-body" hidden={closed}>{children[id]}</div>
         </section>;
       })}
-      {splits.map(split => <Splitter key={split.index} split={split} hidden={maximized !== null} root={root.current}
-        controls={`${instanceId}-${split.first} ${instanceId}-${split.second}`} layout={layout}
+      {splits.map(split => <Splitter key={`${preset}-${split.index}`} split={split} hidden={maximized !== null} root={root.current}
+        controls={split.second ? `${instanceId}-${split.first} ${instanceId}-${split.second}` : `${instanceId}-${split.first}`} layout={layout}
         onResize={(first, second, delta, initial) => resize(split, first, second, delta, initial)} />)}
     </div>
   </div>;
@@ -149,20 +172,21 @@ function Splitter({ split, root, layout, hidden, controls, onResize }: {
 }) {
   const [dragging, setDragging] = useState(false);
   const drag = useRef<{ start: number; first: number; second: number; layout: WorkspaceLayout } | null>(null);
-  const [value, setValue] = useState(50);
+  const [value, setValue] = useState(split.second ? 50 : layout.sizes.stacked[split.index]);
   const measure = () => {
     const first = root?.querySelector(`[data-panel="${split.first}"]`)?.getBoundingClientRect();
-    const second = root?.querySelector(`[data-panel="${split.second}"]`)?.getBoundingClientRect();
-    if (!first || !second) return null;
-    return { first: split.axis === 'x' ? first.width : first.height, second: split.axis === 'x' ? second.width : second.height };
+    const second = split.second ? root?.querySelector(`[data-panel="${split.second}"]`)?.getBoundingClientRect() : undefined;
+    if (!first || (split.second && !second)) return null;
+    return { first: split.axis === 'x' ? first.width : first.height, second: second ? (split.axis === 'x' ? second.width : second.height) : 0 };
   };
   useEffect(() => {
     if (!root) return;
     const observer = new ResizeObserver(() => {
       const sizes = measure();
-      if (sizes && sizes.first + sizes.second) setValue(Math.round(sizes.first / (sizes.first + sizes.second) * 100));
+      if (sizes && sizes.first + sizes.second) setValue(Math.round(split.second ? sizes.first / (sizes.first + sizes.second) * 100 : sizes.first));
     });
     for (const id of [split.first, split.second]) {
+      if (!id) continue;
       const element = root.querySelector(`[data-panel="${id}"]`);
       if (element) observer.observe(element);
     }
@@ -175,25 +199,28 @@ function Splitter({ split, root, layout, hidden, controls, onResize }: {
     event.preventDefault();
     event.currentTarget.focus();
     event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { ...sizes, start: split.axis === 'x' ? event.clientX : event.clientY, layout };
+    drag.current = { ...sizes, start: split.axis === 'x' ? event.clientX : split.second ? event.clientY : event.pageY, layout };
     setDragging(true);
   }
   return <div role="separator" aria-label={split.label} aria-orientation={split.axis === 'x' ? 'vertical' : 'horizontal'}
-    aria-controls={controls} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}
+    aria-controls={controls} aria-valuemin={split.second ? 0 : stackedMinimum[split.first]}
+    aria-valuemax={split.second ? 100 : Number.MAX_SAFE_INTEGER} aria-valuenow={value}
+    aria-valuetext={split.second ? `${value}%` : `${value} пикселей`}
     aria-disabled={split.disabled} tabIndex={split.disabled || hidden ? -1 : 0} hidden={hidden}
     title={`${split.label}: перетащи или используй стрелки`}
     className={`panel-divider axis-${split.axis} ${dragging ? 'dragging' : ''} ${split.disabled ? 'disabled' : ''}`}
     style={{ gridArea: split.area }} onPointerDown={begin}
     onPointerMove={event => {
       if (!drag.current) return;
-      onResize(drag.current.first, drag.current.second, (split.axis === 'x' ? event.clientX : event.clientY) - drag.current.start, drag.current.layout);
+      onResize(drag.current.first, drag.current.second, (split.axis === 'x' ? event.clientX : split.second ? event.clientY : event.pageY) - drag.current.start, drag.current.layout);
     }}
     onPointerUp={event => { drag.current = null; setDragging(false); event.currentTarget.releasePointerCapture(event.pointerId); }}
     onLostPointerCapture={() => { drag.current = null; setDragging(false); }}
+    onPointerCancel={() => { drag.current = null; setDragging(false); }}
     onKeyDown={event => {
       if (split.disabled) return;
       const keys = split.axis === 'x' ? ['ArrowLeft', 'ArrowRight'] : ['ArrowUp', 'ArrowDown'];
-      if (![...keys, 'Home', 'End'].includes(event.key)) return;
+      if (![...keys, 'Home', ...(split.second ? ['End'] : [])].includes(event.key)) return;
       const sizes = measure();
       if (!sizes) return;
       event.preventDefault();

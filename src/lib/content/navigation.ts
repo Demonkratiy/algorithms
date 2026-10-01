@@ -36,10 +36,11 @@ export function getTaskNumber(id: string): string {
 
 export function findCourseLocation(pathname: string) {
   for (const section of courseSections) {
-    if (pathname === `/section/${section.id}`) return { section, number: section.number, topic: undefined };
+    if (pathname === `/section/${section.id}`) return { section, number: section.number, topic: undefined, task: undefined };
     for (const entry of section.topics) {
-      if (pathname === `/topic/${entry.topic.id}` || entry.topic.tasks.some(task => pathname === `/task/${task.id}`)) {
-        return { section, ...entry };
+      const task = entry.topic.tasks.find(task => pathname === `/task/${task.id}`);
+      if (pathname === `/topic/${entry.topic.id}` || task) {
+        return { section, ...entry, task };
       }
     }
   }
